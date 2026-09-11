@@ -1,6 +1,72 @@
 import AppKit
 import WebKit
 
+// MARK: - 拖动区域
+//
+// 在 WKWebView 上方叠一层 46px 高的 NSView，命中「标题栏空白处」时调
+// window.performDrag 拖动整个窗口；命中「traffic lights / 搜索框 / 右侧按钮」
+// 时透传给下层 WKWebView 或 NSWindow chrome。
+//
+// 为什么需要：macOS WKWebView 不识别 CSS `-webkit-app-region: drag`
+// （那是 Electron/Tauri 私有扩展），且原生标题栏被 hidden + 透明，
+// 不借助此 overlay 就无处可拖。
+private final class DragRegionView: NSView {
+    weak var hostWindow: NSWindow?
+    /// 局部坐标下需要透传点击的矩形（traffic lights / 搜索框 / 右侧按钮区）。
+    /// hitTest 在这些矩形内返回 nil，让事件下穿到 WKWebView 或 NSWindow 自身。
+    private var passthroughRects: [NSRect] = []
+
+    /// 根据窗口当前宽度重新计算 passthrough 区域。窗口 resize 后 layout() 自动调用。
+    func refreshPassthrough(windowWidth: CGFloat) {
+        let bw = max(windowWidth, 800)
+        let h = bounds.height          // 46
+        let leftInset: CGFloat = 78     // traffic lights + HTML padding-left
+        let localW = bw - leftInset    // dragRegion 自身宽度
+
+        // 搜索框：HTML 标题栏里居中 ~430px 宽
+        let searchW: CGFloat = 430
+        let searchH: CGFloat = 30
+        let searchLocalCx = (bw / 2) - leftInset
+        let searchRect = NSRect(
+            x: searchLocalCx - searchW / 2,
+            y: (h - searchH) / 2,
+            width: searchW,
+            height: searchH
+        )
+
+        // 右侧按钮区：stats + probe + logs 总宽 ~200px，HTML padding-right 14
+        let rightW: CGFloat = 200
+        let rightRect = NSRect(
+            x: max(0, localW - rightW),
+            y: 0,
+            width: rightW,
+            height: h
+        )
+
+        passthroughRects = [searchRect, rightRect]
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        for r in passthroughRects where r.contains(point) { return nil }
+        return self
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        hostWindow?.performDrag(with: event)
+    }
+
+    override func layout() {
+        super.layout()
+        // 跟随窗口 resize 重新计算 passthrough
+        if let win = hostWindow ?? window {
+            refreshPassthrough(windowWidth: win.frame.width)
+        }
+    }
+
+    override func draw(_ dirtyRect: NSRect) { /* 完全透明，不拦截视觉 */ }
+}
+
+
 public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     public var window: NSWindow!
     public var webView: WKWebView!
@@ -70,7 +136,29 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         window.contentView?.addSubview(webView)
         bridge.webView = webView
 
+        // 标题栏拖动区域（必须在 webView 之后 addSubview，确保在 z 序顶层）
+        // WKWebView 不识别 -webkit-app-region: drag，必须用 native overlay 接管拖动。
+        installDragRegion()
+
         loadUI()
+    }
+
+    /// 在 WKWebView 之上覆盖一层 46px native 拖动区。
+    /// 命中标题栏空白 → window.performDrag；命中 traffic lights / 搜索框 / 右侧按钮 → 透传。
+    private func installDragRegion() {
+        guard let cv = window.contentView else { return }
+        let tb: CGFloat = 46
+        let dragRegion = DragRegionView(frame: NSRect(
+            x: 78,                                              // 避开左上 traffic lights
+            y: cv.bounds.height - tb,
+            width: max(0, cv.bounds.width - 78),
+            height: tb
+        ))
+        dragRegion.autoresizingMask = [.width, .maxYMargin]    // 横向拉伸，始终贴顶
+        dragRegion.hostWindow = window
+        dragRegion.refreshPassthrough(windowWidth: cv.bounds.width)
+        cv.addSubview(dragRegion)
+        VeilLog.info("[app] 标题栏拖动区域已挂载 (\(Int(dragRegion.bounds.width))x\(Int(dragRegion.bounds.height)))")
     }
 
     private func loadUI() {
