@@ -97,6 +97,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
 
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         notifyJS("ready", true)
+        // i18n: 注入当前 locale，i18n.js init() 在 __veilLocale 缺失时回落到 zh-CN
+        let veilLocale = Store.shared.settings().locale
+        webView.evaluateJavaScript("window.__veilLocale = \"\(veilLocale)\";") { _, err in
+            if let err = err { VeilLog.warn("[i18n] 注入 __veilLocale 失败: \(err.localizedDescription)") }
+        }
     }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         VeilLog.error("[ui] 加载失败: \(error.localizedDescription)")

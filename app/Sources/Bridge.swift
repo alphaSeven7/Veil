@@ -367,7 +367,18 @@ public final class Bridge: NSObject, WKScriptMessageHandler {
         if old.apiPort != s.apiPort || old.apiEnabled != s.apiEnabled {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { LocalAPI.shared.restart() }
         }
+        // i18n: 设置持久化后，若 locale 变化则通知前端切换；不强制 reload
+        if old.locale != s.locale { applyLocaleToJS(s.locale) }
         return .ok(J.any(from: s))
+    }
+
+    /// i18n: 把当前 locale 推给前端 i18n 运行时，并刷新 DOM 文案
+    private func applyLocaleToJS(_ locale: String) {
+        guard let wv = webView else { return }
+        let js = "if(window.i18n){i18n.setLocale('\(locale)').then(function(){i18n.applyToDOM();});}"
+        wv.evaluateJavaScript(js) { _, err in
+            if let err = err { VeilLog.warn("[i18n] setLocale 失败: \(err.localizedDescription)") }
+        }
     }
 
     private func exportProfiles(_ params: [String: Any]) -> BridgeResult {
