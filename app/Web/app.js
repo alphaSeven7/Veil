@@ -123,7 +123,7 @@ function toast(type, title, desc, ms) {
   const node = h(`<div class="toast ${type}">
       <div class="ic">${icons[type] || 'i'}</div>
       <div class="tx"><div class="tt">${esc(title)}</div>${desc ? `<div class="td">${esc(desc)}</div>` : ''}</div>
-      <button class="cl" title="$${'running.closeBtn'}">×</button></div>`).firstChild;
+      <button class="cl" title="${i18n.t('running.closeBtn')}">×</button></div>`).firstChild;
   root.appendChild(node);
   const kill = () => { node.classList.add('out'); setTimeout(() => node.remove(), 200); };
   node.querySelector('.cl').onclick = kill;
@@ -224,7 +224,7 @@ function promptDlg(opts) {
    ========================================================================== */
 function viewProfiles() {
   const st = S.stats || {};
-  const groupOpts = [`<option value="__all__">${'common.allGroups'}</option>`]
+  const groupOpts = [`<option value="__all__">${i18n.t('common.allGroups')}</option>`]
     .concat(S.groups.map(g => `<option value="${esc(g.id)}" ${S.groupId === g.id ? 'selected' : ''}>${esc(g.name)}</option>`))
     .concat([`<option value="__none__" ${S.groupId === '__none__' ? 'selected' : ''}>${i18n.t('common.ungrouped')}</option>`]).join('');
   const platformOpts = ['all', 'windows', 'mac', 'linux', 'android']
@@ -239,11 +239,11 @@ function viewProfiles() {
       <div class="view-tools">
         <select id="fGroup" style="width:132px">${groupOpts}</select>
         <select id="fPlatform" style="width:112px">${platformOpts}</select>
-        <label class="switch" title="$${'profile.showRunningOnly'}"><input type="checkbox" id="fRunning" ${S.runningOnly ? 'checked' : ''}><span class="track"></span><span class="lb">${'profile.statusRunning'}</span></label>
+        <label class="switch" title="${i18n.t('profile.showRunningOnly')}"><input type="checkbox" id="fRunning" ${S.runningOnly ? 'checked' : ''}><span class="track"></span><span class="lb">${i18n.t('profile.statusRunning')}</span></label>
         <div style="width:1px;height:20px;background:var(--line)"></div>
-        <button class="btn" id="btnBatchNew" title="$${'button.batchNew'}">
-          <svg viewBox="0 0 16 16" width="13" height="13"><path fill="currentColor" d="M2 3h8v1H2V3Zm0 3h8v1H2V6Zm10-3v3h3v1h-3v3H9V7H6V6h3V3h3Z"/></svg>${'button.batchNew'}</button>
-        <button class="btn" id="btnImport" title="$${'button.importProfiles'}">${i18n.t('button.import')}</button>
+        <button class="btn" id="btnBatchNew" title="${i18n.t('button.batchNew')}">
+          <svg viewBox="0 0 16 16" width="13" height="13"><path fill="currentColor" d="M2 3h8v1H2V3Zm0 3h8v1H2V6Zm10-3v3h3v1h-3v3H9V7H6V6h3V3h3Z"/></svg>${i18n.t('button.batchNew')}</button>
+        <button class="btn" id="btnImport" title="${i18n.t('button.importProfiles')}">${i18n.t('button.import')}</button>
         <button class="btn" id="btnExport" title="${i18n.t('button.exportAll')}">${i18n.t('button.export2')}</button>
         <button class="btn btn-primary" id="btnNew">
           <svg viewBox="0 0 16 16" width="13" height="13"><path fill="currentColor" d="M8 2.5a.8.8 0 0 1 .8.8v3.9h3.9a.8.8 0 0 1 0 1.6H8.8v3.9a.8.8 0 0 1-1.6 0V8.8H3.3a.8.8 0 0 1 0-1.6h3.9V3.3a.8.8 0 0 1 .8-.8Z"/></svg>
@@ -253,11 +253,11 @@ function viewProfiles() {
 
     <div class="view-body">
       <div class="stats">
-        <div class="stat ac"><div class="k">${'stats.totalProfiles'}</div><div class="v">${st.total || 0}</div></div>
-        <div class="stat ok"><div class="k"><span class="dot dot-live"></span> i18n.t('profile.statusRunning')</div><div class="v">${st.running || 0}</div></div>
-        <div class="stat"><div class="k">${'stats.withProxy'}</div><div class="v">${st.withProxy || 0}</div></div>
-        <div class="stat"><div class="k">${'stats.totalOpens'}</div><div class="v">${st.totalOpens || 0}<small>${'stats.timesUnit'}</small></div></div>
-        <div class="stat warn"><div class="k">${'stats.diskUsage'}</div><div class="v">${(st.diskUsageMB || 0) > 1024 ? ((st.diskUsageMB / 1024).toFixed(2) + '') : (st.diskUsageMB || 0)}<small>${(st.diskUsageMB || 0) > 1024 ? 'GB' : 'MB'}</small></div></div>
+        <div class="stat ac"><div class="k">${i18n.t('stats.totalProfiles')}</div><div class="v">${st.total || 0}</div></div>
+        <div class="stat ok"><div class="k"><span class="dot dot-live"></span>${ i18n.t('profile.statusRunning')}</div><div class="v">${st.running || 0}</div></div>
+        <div class="stat"><div class="k">${i18n.t('stats.withProxy')}</div><div class="v">${st.withProxy || 0}</div></div>
+        <div class="stat"><div class="k">${i18n.t('stats.totalOpens')}</div><div class="v">${st.totalOpens || 0}<small>${i18n.t('stats.timesUnit')}</small></div></div>
+        <div class="stat warn"><div class="k">${i18n.t('stats.diskUsage')}</div><div class="v">${(st.diskUsageMB || 0) > 1024 ? ((st.diskUsageMB / 1024).toFixed(2) + '') : (st.diskUsageMB || 0)}<small>${(st.diskUsageMB || 0) > 1024 ? 'GB' : 'MB'}</small></div></div>
       </div>
 
       ${bulkBar()}
@@ -272,17 +272,17 @@ function bulkBar() {
   return `<div class="row wrap" style="margin:0 0 10px;padding:9px 12px;background:var(--ac-soft);border:1px solid var(--ac-line);border-radius:var(--r-l);animation:fadeIn .15s">
     <b style="font-size:12.5px;color:#a9bcff">${i18n.t('profile.selectedCount', {n: n})}</b>
     <div style="width:1px;height:18px;background:var(--ac-line)"></div>
-    <button class="btn btn-sm" data-bulk="open">${'button.batchOpen'}</button>
-    <button class="btn btn-sm" data-bulk="close">${'button.batchClose'}</button>
-    <button class="btn btn-sm" data-bulk="group">${'button.moveToGroup'}</button>
+    <button class="btn btn-sm" data-bulk="open">${i18n.t('button.batchOpen')}</button>
+    <button class="btn btn-sm" data-bulk="close">${i18n.t('button.batchClose')}</button>
+    <button class="btn btn-sm" data-bulk="group">${i18n.t('button.moveToGroup')}</button>
     <button class="btn btn-sm" data-bulk="enable">${i18n.t('button.enable')}</button>
     <button class="btn btn-sm" data-bulk="disable">${i18n.t('button.disable')}</button>
-    <button class="btn btn-sm" data-bulk="proxyCheck">${'button.checkProxyBtn'}</button>
+    <button class="btn btn-sm" data-bulk="proxyCheck">${i18n.t('button.checkProxyBtn')}</button>
     <button class="btn btn-sm" data-bulk="export">${i18n.t('button.export2')}</button>
-    <button class="btn btn-sm" data-bulk="clearCache">${'button.clearCache'}</button>
-    <button class="btn btn-sm btn-bad" data-bulk="delete">${'button.deleteAll'}</button>
+    <button class="btn btn-sm" data-bulk="clearCache">${i18n.t('button.clearCache')}</button>
+    <button class="btn btn-sm btn-bad" data-bulk="delete">${i18n.t('button.deleteAll')}</button>
     <div class="grow"></div>
-    <button class="btn btn-sm btn-ghost" data-bulk="none">${'common.cancelSelection'}</button>
+    <button class="btn btn-sm btn-ghost" data-bulk="none">${i18n.t('common.cancelSelection')}</button>
   </div>`;
 }
 
@@ -332,16 +332,16 @@ function tableHTML() {
       <td><span class="badge os-${esc(fp.platform || 'windows')}" title="${esc(fp.platform)}">${osIcon(fp.platform || 'windows')}&nbsp;${esc(osName(fp.platform || 'windows'))}</span></td>
       <td>${proxyBadge(px)}</td>
       <td class="ellipsis" title="${esc(fp.timezone || '')}">${esc(p.countryName || fp.timezone || i18n.t('misc.unknown'))}</td>
-      <td>${running ? `<span class="badge run"><i></i>${'profile.statusRunning'}</span>`
-        : (p.enabled === false ? `<span class="badge dis"><i></i>${'profile.statusDisabled'}</span>` : `<span class="badge stop"><i></i>${'profile.statusStopped'}</span>`)}</td>
+      <td>${running ? `<span class="badge run"><i></i>${i18n.t('profile.statusRunning')}</span>`
+        : (p.enabled === false ? `<span class="badge dis"><i></i>${i18n.t('profile.statusDisabled')}</span>` : `<span class="badge stop"><i></i>${i18n.t('profile.statusStopped')}</span>`)}</td>
       <td class="ellipsis" title="${p.lastOpenedAt ? fmtTime(p.lastOpenedAt) : ''}">${p.lastOpenedAt ? fmtAgo(p.lastOpenedAt) : i18n.t('profile.neverOpened')}</td>
       <td class="c-act"><div class="rowacts">
         ${running
           ? `<button class="btn btn-sm" data-act="detect" title="${i18n.t('profile.titleDetect')}">${i18n.t('button.fingerprintCheck')}</button>
-             <button class="btn btn-sm btn-bad" data-act="close" title="$${'profile.closeWindow'}">${'running.closeBtn'}</button>`
+             <button class="btn btn-sm btn-bad" data-act="close" title="${i18n.t('profile.closeWindow')}">${i18n.t('running.closeBtn')}</button>`
           : `<button class="btn btn-sm btn-ok" data-act="open" title="${i18n.t('profile.openWindow')}">${i18n.t('button.open')} ▶</button>`}
-        <button class="btn btn-sm" data-act="edit" title="$${'profile.editHint'}">${i18n.t('common.edit')}</button>
-        <button class="btn btn-sm btn-ghost" data-act="more" title="$${i18n.t('common.more')}">⋯</button>
+        <button class="btn btn-sm" data-act="edit" title="${i18n.t('profile.editHint')}">${i18n.t('common.edit')}</button>
+        <button class="btn btn-sm btn-ghost" data-act="more" title="${i18n.t('common.more')}">⋯</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -355,7 +355,7 @@ function tableHTML() {
       <th class="c-check"><input type="checkbox" class="ck" id="ckAll" ${allSel ? 'checked' : ''}></th>
       <th data-sort="seq">#</th><th data-sort="name">${i18n.t('profile.name')}</th><th>${i18n.t('profile.group')}</th>
       <th data-sort=i18n.t('editor.clientHintPlatform')>${i18n.t('profile.platform')}</th><th>${i18n.t('profile.proxy')}</th><th data-sort="country">${i18n.t('profile.region')}</th>
-      <th data-sort="status">${i18n.t('profile.status')}</th><th data-sort="lastOpenedAt">${'profile.lastOpenedAt'}</th><th style="text-align:right">${i18n.t('profile.actions')}</th>
+      <th data-sort="status">${i18n.t('profile.status')}</th><th data-sort="lastOpenedAt">${i18n.t('profile.lastOpenedAt')}</th><th style="text-align:right">${i18n.t('profile.actions')}</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
@@ -498,7 +498,7 @@ function updateFilterOptions() {
   const g = qs('#fGroup');
   if (g) {
     const cur = g.value;
-    g.innerHTML = [`<option value="__all__">${'common.allGroups'}</option>`]
+    g.innerHTML = [`<option value="__all__">${i18n.t('common.allGroups')}</option>`]
       .concat(S.groups.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`))
       .concat([`<option value="__none__">${i18n.t('common.ungrouped')}</option>`]).join('');
     g.value = cur;
@@ -560,7 +560,7 @@ async function doBulk(kind) {
       toast('ok', kind === 'enable' ? i18n.t('toast.enabled') : i18n.t('profile.statusDisabled'), i18n.t('group.profileCount', {n: ids.length}));
       return loadProfiles(true);
     case 'delete': {
-      const withData = await confirmDlg({ title: i18n.t('dialog.deleteNProfiles', {n: ids.length}), tone: 'bad', message: i18n.t('dialog.deleteNMessage'), okText: i18n.t('button.deleteAll'), okClass: 'btn-bad', extra: `<label class="switch" style="margin-top:4px"><input type="checkbox" id="delKeep"><span class="track"></span><span class="lb">${'dialog.keepDataLabel'}</span></label>` });
+      const withData = await confirmDlg({ title: i18n.t('dialog.deleteNProfiles', {n: ids.length}), tone: 'bad', message: i18n.t('dialog.deleteNMessage'), okText: i18n.t('button.deleteAll'), okClass: 'btn-bad', extra: `<label class="switch" style="margin-top:4px"><input type="checkbox" id="delKeep"><span class="track"></span><span class="lb">${i18n.t('dialog.keepDataLabel')}</span></label>` });
       if (!withData) return;
       const keep = qs('#delKeep'); const keepData = keep ? keep.checked : false;
       await Bridge.call('deleteProfiles', { ids, deleteData: !keepData });
@@ -695,12 +695,12 @@ function openEditor(id) {
     title: i18n.t('editor.title', {n: p.seq}), subtitle: p.name, size: 'wide', tabs,
     body: '<div class="busy"><div class="spinner lg"></div>' + i18n.t('common.loading') + '</div>',
     footer: `<div class="row" style="gap:6px;color:var(--tx-4);font-size:11px">
-                 <span class="mono-s" title="$${'editor.fpSeed'}">seed ${esc((p.fp.seed || '').slice(0, 12))}…</span>
+                 <span class="mono-s" title="${i18n.t('editor.fpSeed')}">seed ${esc((p.fp.seed || '').slice(0, 12))}…</span>
                </div>
                <div class="grow"></div>
                <button class="btn" data-act="cancel">${i18n.t('common.cancel')}</button>
-               <button class="btn" data-act="saveTemplate">${'button.saveAsTemplate'}</button>
-               <button class="btn" data-act="reset">${'button.resetFp'}</button>
+               <button class="btn" data-act="saveTemplate">${i18n.t('button.saveAsTemplate')}</button>
+               <button class="btn" data-act="reset">${i18n.t('button.resetFp')}</button>
                <button class="btn btn-primary" data-act="save">${i18n.t('common.save')}</button>`,
     onMount(api) {
       renderEditorTab();
@@ -746,11 +746,11 @@ function renderEditorTab() {
 
 /* ---------------- 基础 ---------------- */
 function tabBasic(p) {
-  const gOpts = [`<option value="">${'common.ungroupedParen'}</option>`].concat(S.groups.map(g =>
+  const gOpts = [`<option value="">${i18n.t('common.ungroupedParen')}</option>`].concat(S.groups.map(g =>
     `<option value="${esc(g.id)}" ${p.groupId === g.id ? 'selected' : ''}>${esc(g.name)}</option>`)).join('');
   return `<div class="stack">
     <div class="grid2">
-      <div class="field"><label>${'editor.profileName'}</label><input data-bind="name" value="${esc(p.name)}" placeholder="$" + i18n.t('editor.profileNamePlaceholder')}"></div>
+      <div class="field"><label>${i18n.t('editor.profileName')}</label><input data-bind="name" value="${esc(p.name)}" placeholder="$" + i18n.t('editor.profileNamePlaceholder')}"></div>
       <div class="field"><label>${i18n.t('editor.seq')}</label><input data-bind="seq" type="number" min="1" value="${p.seq}"></div>
     </div>
     <div class="grid2">
@@ -761,8 +761,8 @@ function tabBasic(p) {
         </select></div>
     </div>
     <div class="field"><label>${i18n.t('common.remark')}</label><textarea data-bind="remark" rows="2" placeholder="$" + i18n.t('editor.remarkPlaceholder')}">${esc(p.remark || '')}</textarea></div>
-    <div class="field"><label>${'editor.tagsLabel'}</label><input data-bind="tags" value="${esc((p.tags || []).join(', '))}" placeholder="$" + i18n.t('editor.tagsPlaceholder')}"></div>
-    <label class="switch"><input type="checkbox" class="ck" data-bind="enabled" ${p.enabled !== false ? 'checked' : ''}><span class="track"></span><span class="lb">${'editor.enabledLabel'}</span></label>
+    <div class="field"><label>${i18n.t('editor.tagsLabel')}</label><input data-bind="tags" value="${esc((p.tags || []).join(', '))}" placeholder="$" + i18n.t('editor.tagsPlaceholder')}"></div>
+    <label class="switch"><input type="checkbox" class="ck" data-bind="enabled" ${p.enabled !== false ? 'checked' : ''}><span class="track"></span><span class="lb">${i18n.t('editor.enabledLabel')}</span></label>
     <hr class="sep">
     <div class="fp-grid">
       ${kv(i18n.t('editor.profileId'), p.id)}
@@ -772,7 +772,7 @@ function tabBasic(p) {
       ${kv(i18n.t('editor.fpMode'), { random: i18n.t('editor.fpModeRandom'), custom: i18n.t('editor.fpModeCustom'), real: i18n.t('editor.fpModeReal') }[p.fp.mode] || p.fp.mode)}
       ${kv(i18n.t('editor.dataDir'), 'profiles/' + p.id + '/data')}
     </div>
-    <div class="notice info">i18n.t('editor.isolationNote')</div>
+    <div class="notice info">${i18n.t('editor.isolationNote')}</div>
   </div>`;
 }
 function kv(k, v) { return `<div><div class="lbl" style="margin-bottom:3px">${esc(k)}</div><div class="mono-s">${esc(v)}</div></div>`; }
@@ -782,29 +782,29 @@ function tabProxy(p) {
   const px = p.proxy || {};
   const r = px.checkResult;
   return `<div class="stack">
-    <div class="notice info">i18n.t('editor.proxyNote')</div>
+    <div class="notice info">${i18n.t('editor.proxyNote')}</div>
     <div class="grid2">
       <div class="field"><label>${i18n.t('editor.proxyType')}</label>
         <select data-bind="proxy.type">
           ${[['none', i18n.t('editor.proxyNone')], ['custom', i18n.t('editor.proxyCustom')], ['http', 'HTTP'], ['https', 'HTTPS'], ['socks5', 'SOCKS5']]
             .map(([v, t]) => `<option value="${v}" ${(px.type || 'none') === v ? 'selected' : ''}>${t}</option>`).join('')}
         </select></div>
-      <div class="field"><label>${'editor.proxyPaste'}</label>
+      <div class="field"><label>${i18n.t('editor.proxyPaste')}</label>
         <div class="row"><input id="pxPaste" placeholder="${i18n.t('editor.proxyPastePh')}" style="flex:1">
-        <button class="btn" data-ed="parseProxy">${'button.parseProxy'}</button></div></div>
+        <button class="btn" data-ed="parseProxy">${i18n.t('button.parseProxy')}</button></div></div>
     </div>
     <div class="grid3">
-      <div class="field"><label>${'editor.proxyHost'}</label><input data-bind="proxy.host" value="${esc(px.host || '')}" placeholder="${i18n.t('editor.placeholderIp')}"></div>
-      <div class="field"><label>${'editor.proxyPort'}</label><input data-bind="proxy.port" type="number" value="${px.port || ''}" placeholder="${i18n.t('editor.placeholderPort')}"></div>
-      <div class="field"><label>${'editor.proxyPreview'}</label><div class="mono-s" data-out="proxyLabel" style="padding-top:7px">${esc(proxySummary(px))}</div></div>
+      <div class="field"><label>${i18n.t('editor.proxyHost')}</label><input data-bind="proxy.host" value="${esc(px.host || '')}" placeholder="${i18n.t('editor.placeholderIp')}"></div>
+      <div class="field"><label>${i18n.t('editor.proxyPort')}</label><input data-bind="proxy.port" type="number" value="${px.port || ''}" placeholder="${i18n.t('editor.placeholderPort')}"></div>
+      <div class="field"><label>${i18n.t('editor.proxyPreview')}</label><div class="mono-s" data-out="proxyLabel" style="padding-top:7px">${esc(proxySummary(px))}</div></div>
     </div>
     <div class="grid2">
-      <div class="field"><label>${'editor.proxyUsername'}</label><input data-bind="proxy.username" value="${esc(px.username || '')}" autocomplete="off"></div>
-      <div class="field"><label>${'editor.proxyPassword'}</label><input data-bind="proxy.password" type="password" value="${esc(px.password || '')}" autocomplete="off"></div>
+      <div class="field"><label>${i18n.t('editor.proxyUsername')}</label><input data-bind="proxy.username" value="${esc(px.username || '')}" autocomplete="off"></div>
+      <div class="field"><label>${i18n.t('editor.proxyPassword')}</label><input data-bind="proxy.password" type="password" value="${esc(px.password || '')}" autocomplete="off"></div>
     </div>
     <div class="row wrap">
-      <button class="btn btn-primary" data-ed="checkProxy"><span class="spinner hidden" data-role="pxSpin"></span>${'button.checkProxyBtn'}</button>
-      <button class="btn" data-ed="syncTz">${'editor.proxySyncTz'}</button>
+      <button class="btn btn-primary" data-ed="checkProxy"><span class="spinner hidden" data-role="pxSpin"></span>${i18n.t('button.checkProxyBtn')}</button>
+      <button class="btn" data-ed="syncTz">${i18n.t('editor.proxySyncTz')}</button>
       <div class="grow"></div>
       ${r ? `<span class="badge ${r.ok ? 'run' : 'dis'}">${r.ok ? i18n.t('editor.proxyOk') : i18n.t('editor.proxyBad')}</span>
              <span class="hint">${i18n.t('editor.probeAt', {time: fmtTime(r.checkedAt)})}</span>` : ''}
@@ -813,8 +813,8 @@ function tabProxy(p) {
   </div>`;
 }
 function proxyResultHTML(r) {
-  if (!r.ok) return `<div class="notice bad"><b>${'toast.proxyFailed'}</b> — ${esc(r.error || i18n.t('editor.proxyUnknownError'))}</div>`;
-  return `<div class="fp-sec open"><div class="fp-head"><span class="ic">🌐</span><h4>${'editor.exitInfo'}</h4>
+  if (!r.ok) return `<div class="notice bad"><b>${i18n.t('toast.proxyFailed')}</b> — ${esc(r.error || i18n.t('editor.proxyUnknownError'))}</div>`;
+  return `<div class="fp-sec open"><div class="fp-head"><span class="ic">🌐</span><h4>${i18n.t('editor.exitInfo')}</h4>
       <span class="d">${esc(r.ip)} · ${esc(r.country || '')} ${esc(r.city || '')} · ${r.latencyMs}ms</span></div>
     <div class="fp-body"><div class="fp-grid">
       ${kv(i18n.t('editor.exitIp'), r.ip)}${kv(i18n.t('editor.country'), `${r.country || i18n.t('misc.unknown')} (${r.countryCode || i18n.t('misc.unknown')})`)}
@@ -831,9 +831,9 @@ function tabLaunch(p) {
   const lc = p.launch || {};
   const browsers = (S.env.browsers || []).map(b => `<option value="${esc(b.path)}" ${lc.browserPath === b.path ? 'selected' : ''}>${esc(b.name)} ${esc(b.version || '')}</option>`).join('');
   return `<div class="stack">
-    <div class="field"><label>${'editor.browserEngine'}</label>
+    <div class="field"><label>${i18n.t('editor.browserEngine')}</label>
       <div class="row"><select data-bind="launch.browserPath" style="flex:1">
-          <option value="">${'editor.autoSelect'}</option>${browsers}
+          <option value="">${i18n.t('editor.autoSelect')}</option>${browsers}
           ${lc.browserPath && !(S.env.browsers || []).some(b => b.path === lc.browserPath) ? `<option value="${esc(lc.browserPath)}" selected>${esc(lc.browserPath)}</option>` : ''}
         </select>
         <button class="btn" data-ed="pickBrowser">${i18n.t('button.browse')}</button>
@@ -841,24 +841,24 @@ function tabLaunch(p) {
       <div class="hint">editor.installed</div></div>
     <div class="field"><label>${i18n.t('editor.homepage')}</label>
       <div class="row"><input data-bind="launch.homepage" value="${esc(lc.homepage || '')}" placeholder="$" + i18n.t('editor.homepagePlaceholder')}" style="flex:1"></div>
-      <div class="hint">${'editor.specialAddr'}</div></div>
-    <div class="field"><label>${'editor.extraTabs'}</label>
+      <div class="hint">${i18n.t('editor.specialAddr')}</div></div>
+    <div class="field"><label>${i18n.t('editor.extraTabs')}</label>
       <textarea data-bind="launch.extraTabs" rows="2" placeholder="${i18n.t('common.urlPlaceholder')}">${esc((lc.extraTabs || []).join('\n'))}</textarea></div>
     <div class="grid2">
-      <div class="field"><label>${'editor.windowPositionMode'}</label>
+      <div class="field"><label>${i18n.t('editor.windowPositionMode')}</label>
         <select data-bind="launch.windowPositionMode">
           ${[['cascade', i18n.t('editor.posCascade')], ['fixed', i18n.t('editor.posFixed')], ['auto', i18n.t('editor.posAuto')]]
             .map(([v, t]) => `<option value="${v}" ${(lc.windowPositionMode || 'cascade') === v ? 'selected' : ''}>${t}</option>`).join('')}
         </select></div>
-      <div class="field"><label>${'editor.windowPosXY'}</label>
+      <div class="field"><label>${i18n.t('editor.windowPosXY')}</label>
         <div class="row"><input data-bind="launch.windowPositionX" type="number" value="${lc.windowPositionX || 0}" style="width:50%">
         <input data-bind="launch.windowPositionY" type="number" value="${lc.windowPositionY || 0}" style="width:50%"></div></div>
     </div>
-    <div class="field"><label>${'editor.extraArgs'}</label>
+    <div class="field"><label>${i18n.t('editor.extraArgs')}</label>
       <textarea data-bind="launch.extraArgs" rows="3" placeholder="--disable-gpu&#10;--ignore-certificate-errors">${esc((lc.extraArgs || []).join('\n'))}</textarea>
-      <div class="hint">i18n.t('editor.extraArgsHint')</div></div>
+      <div class="hint">${i18n.t('editor.extraArgsHint')}</div></div>
     <hr class="sep">
-    <label class="switch"><input type="checkbox" class="ck" data-bind="launch.useMockKeychain" ${lc.useMockKeychain !== false ? 'checked' : ''}><span class="track"></span><span class="lb">${'editor.useMockKeychain'}</span></label>
+    <label class="switch"><input type="checkbox" class="ck" data-bind="launch.useMockKeychain" ${lc.useMockKeychain !== false ? 'checked' : ''}><span class="track"></span><span class="lb">${i18n.t('editor.useMockKeychain')}</span></label>
     <label class="switch"><input type="checkbox" class="ck" data-bind="launch.hideDebugInfobar" ${lc.hideDebugInfobar !== false ? 'checked' : ''}><span class="track"></span><span class="lb">editor.hideDebugInfobar</span></label>
     <label class="switch"><input type="checkbox" class="ck" data-bind="launch.incognito" ${lc.incognito ? 'checked' : ''}><span class="track"></span><span class="lb">editor.incognito</span></label>
     <label class="switch"><input type="checkbox" class="ck" data-bind="launch.keepRunningAfterQuit" ${lc.keepRunningAfterQuit !== false ? 'checked' : ''}><span class="track"></span><span class="lb">editor.keepRunningAfterQuit</span></label>
@@ -870,23 +870,23 @@ function tabAuto(p) {
   const a = p.automation || {};
   const cks = a.cookies || [];
   return `<div class="stack">
-    <div class="field"><label>${'editor.autoScriptLabel'}</label>
+    <div class="field"><label>${i18n.t('editor.autoScriptLabel')}</label>
       <textarea rows="5" id="autoScripts" placeholder="$" + i18n.t('editor.autoScriptPlaceholder')}">${esc((a.scripts || []).join('\n---\n'))}</textarea>
-      <div class="hint">${'editor.autoScriptHint'}</div></div>
+      <div class="hint">${i18n.t('editor.autoScriptHint')}</div></div>
     <hr class="sep">
     <div class="row">
-      <b style="font-size:13px">${'editor.cookieSection'}</b>
-      <span class="badge">i18n.t('editor.cookiesCount')</span>
+      <b style="font-size:13px">${i18n.t('editor.cookieSection')}</b>
+      <span class="badge">${i18n.t('editor.cookiesCount')}</span>
       <div class="grow"></div>
       <button class="btn btn-sm" data-ed="ckImport">${i18n.t('button.import')}</button>
-      <button class="btn btn-sm" data-ed="ckExportJson">${'editor.cookieExportJson'}</button>
-      <button class="btn btn-sm" data-ed="ckExportTxt">${'editor.cookieExportNetscape'}</button>
-      <button class="btn btn-sm" data-ed="ckLive">${'editor.cookieLive'}</button>
-      <button class="btn btn-sm btn-bad" data-ed="ckClear">${'button.cookieClear'}</button>
+      <button class="btn btn-sm" data-ed="ckExportJson">${i18n.t('editor.cookieExportJson')}</button>
+      <button class="btn btn-sm" data-ed="ckExportTxt">${i18n.t('editor.cookieExportNetscape')}</button>
+      <button class="btn btn-sm" data-ed="ckLive">${i18n.t('editor.cookieLive')}</button>
+      <button class="btn btn-sm btn-bad" data-ed="ckClear">${i18n.t('button.cookieClear')}</button>
     </div>
-    <div class="hint">${'editor.cookieHint'}</div>
+    <div class="hint">${i18n.t('editor.cookieHint')}</div>
     <div id="ckList">${cks.length ? `<div class="tbl-wrap" style="max-height:280px;overflow:auto"><table class="tbl">
-      <thead><tr><th style="width:22%">${i18n.t('profile.name')}</th><th>${'editor.paramValue'}</th><th style="width:22%">${i18n.t('editor.cookieDomains')}</th><th style="width:14%">${i18n.t('editor.cookiePaths')}</th><th style="width:15%">${i18n.t('editor.cookieExpires')}</th></tr></thead>
+      <thead><tr><th style="width:22%">${i18n.t('profile.name')}</th><th>${i18n.t('editor.paramValue')}</th><th style="width:22%">${i18n.t('editor.cookieDomains')}</th><th style="width:14%">${i18n.t('editor.cookiePaths')}</th><th style="width:15%">${i18n.t('editor.cookieExpires')}</th></tr></thead>
       <tbody>${cks.slice(0, 400).map(c => `<tr>
         <td class="mono-s">${esc(c.name)}</td>
         <td class="mono-s ellipsis" title="${esc(c.value)}">${esc((c.value || '').slice(0, 60))}${(c.value || '').length > 60 ? '…' : ''}</td>
@@ -943,7 +943,7 @@ function citySelectHTML(fp) {
     groups += `<optgroup label="${esc(country)}">` + byCountry[country]
       .map(c => `<option value="${esc(c.timezone)}|${esc(c.locale)}" ${fp.timezone === c.timezone ? 'selected' : ''}>${esc(c.city)} — ${esc(c.timezone)}</option>`).join('') + `</optgroup>`;
   });
-  return `<select id="citySel" style="width:100%"><option value="">${'editor.citySelPlaceholder'}</option>${groups}</select>`;
+  return `<select id="citySel" style="width:100%"><option value="">${i18n.t('editor.citySelPlaceholder')}</option>${groups}</select>`;
 }
 
 function tabFingerprint(p) {
@@ -956,27 +956,27 @@ function tabFingerprint(p) {
           `<button data-ed="mode:${v}" class="${fp.mode === v ? 'on' : ''}">${t}</button>`).join('')}
       </div>
       <div class="grow"></div>
-      <button class="btn btn-sm" data-ed="reseed">${'editor.reseedFp'}</button>
-      <button class="btn btn-sm" data-ed="useReal">${'editor.useRealFp'}</button>
-      <button class="btn btn-sm" data-ed="loadTpl">${'editor.loadTplBtn'}</button>
+      <button class="btn btn-sm" data-ed="reseed">${i18n.t('editor.reseedFp')}</button>
+      <button class="btn btn-sm" data-ed="useReal">${i18n.t('editor.useRealFp')}</button>
+      <button class="btn btn-sm" data-ed="loadTpl">${i18n.t('editor.loadTplBtn')}</button>
     </div>
 
     <div class="fp-grid" style="grid-template-columns:1fr 1fr 1fr">
-      <div><div class="lbl" style="margin-bottom:3px">${'editor.fpSeedLabel'}</div>
+      <div><div class="lbl" style="margin-bottom:3px">${i18n.t('editor.fpSeedLabel')}</div>
         <div class="row"><input class="mono-s" data-bind="fp.seed" value="${esc(fp.seed)}" style="flex:1;font-family:var(--fm);font-size:10.5px">
         <button class="btn btn-sm" data-ed="reseed" title="${i18n.t('editor.fontRegenerate')}">↻</button></div></div>
-      <div><div class="lbl" style="margin-bottom:3px">${'dialog.targetPlatform'}</div>
+      <div><div class="lbl" style="margin-bottom:3px">${i18n.t('dialog.targetPlatform')}</div>
         <select data-bind="fp.platform">${['windows', 'mac', 'linux', 'android'].map(x =>
           `<option value="${x}" ${fp.platform === x ? 'selected' : ''}>${osName(x)}</option>`).join('')}</select></div>
-      <div><div class="lbl" style="margin-bottom:3px">${'editor.fpModeDesc'}</div>
+      <div><div class="lbl" style="margin-bottom:3px">${i18n.t('editor.fpModeDesc')}</div>
         <div class="mono-s" style="padding-top:6px">${{ random: i18n.t('editor.fpModeDescRandom'), custom: i18n.t('editor.fpModeDescCustom'), real: i18n.t('editor.fpModeDescReal') }[fp.mode] || fp.mode}</div></div>
     </div>
 
     ${warn.length ? `<div class="notice warn"><div><b>editor.fpConsistencyWarn</b><br>${warn.map(w => '· ' + w).join('<br>')}</div></div>` :
-      `<div class="notice ok">${'editor.fpConsistencyOk'}</div>`}
+      `<div class="notice ok">${i18n.t('editor.fpConsistencyOk')}</div>`}
 
     ${sec('base', '🌍', i18n.t('editor.fpSection1'), `${esc(fp.timezone)} · ${esc((fp.languages || []).join(', '))}`, `
-      <div class="field"><label>${'editor.cityLabel'}</label>${citySelectHTML(fp)}</div>
+      <div class="field"><label>${i18n.t('editor.cityLabel')}</label>${citySelectHTML(fp)}</div>
       <div class="grid3">
         ${txt('fp.timezone', i18n.t('editor.timezoneLabel'), fp.timezone, i18n.t('editor.timezonePh'))}
         ${txt('fp.locale', i18n.t('editor.localeLabel'), fp.locale, i18n.t('editor.localePh'))}
@@ -984,14 +984,14 @@ function tabFingerprint(p) {
       </div>
       <div class="grid2">
         ${txt('fp.languages', i18n.t('editor.languagesLabel'), (fp.languages || []).join(', '), i18n.t('editor.languagesPh'))}
-        <div class="field"><label>${'editor.geoLabel'}</label>
+        <div class="field"><label>${i18n.t('editor.geoLabel')}</label>
           <div class="row">${sw('fp.geo.enabled', fp.geo && fp.geo.enabled, i18n.t('editor.geoOverride'), '')}
           <input type="number" step="0.0001" data-bind="fp.geo.latitude" value="${fp.geo ? fp.geo.latitude : 0}" style="flex:1" placeholder="$" + i18n.t('editor.geoLat')}">
           <input type="number" step="0.0001" data-bind="fp.geo.longitude" value="${fp.geo ? fp.geo.longitude : 0}" style="flex:1" placeholder="$" + i18n.t('editor.geoLng')}"></div></div>
       </div>
       <hr class="sep">
       ${txt('fp.userAgent', i18n.t('fingerprint.ua'), fp.userAgent, '')}
-      <details style="margin-top:2px"><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${'editor.clientHintsTitle'}</summary>
+      <details style="margin-top:2px"><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${i18n.t('editor.clientHintsTitle')}</summary>
         <div class="stack" style="margin-top:9px">
           <div class="grid3">
             ${txt('fp.uaMetadata.platform', i18n.t('editor.clientHintPlatform'), md.platform, i18n.t('platform.windows'))}
@@ -1006,7 +1006,7 @@ function tabFingerprint(p) {
           </div>
           ${txt('fp.uaMetadata.brandsText', i18n.t('editor.brandsJson'), JSON.stringify(md.brands || []))}
           <div class="hint"editor.brandsJsonHint</div>
-          <div class="row"><button class="btn btn-sm" data-ed="genUA">${'editor.genUaBtn'}</button></div>
+          <div class="row"><button class="btn btn-sm" data-ed="genUA">${i18n.t('editor.genUaBtn')}</button></div>
         </div>
       </details>
     `, true)}
@@ -1025,10 +1025,10 @@ function tabFingerprint(p) {
         ${num('fp.windowHeight', i18n.t('editor.windowHeight'), fp.windowHeight)}
       </div>
       <div class="row wrap">
-        <button class="btn btn-sm" data-ed="resPreset">${'editor.resPresetsBtn'}</button>
+        <button class="btn btn-sm" data-ed="resPreset">${i18n.t('editor.resPresetsBtn')}</button>
         ${sw('fp.forceViewport', fp.forceViewport, i18n.t('editor.forceViewport'), i18n.t('editor.forceViewportHint'))}
       </div>
-      <div class="hint">${'editor.screenHint'}</div>
+      <div class="hint">${i18n.t('editor.screenHint')}</div>
     `)}
 
     ${sec('hw', '⚙️', i18n.t('editor.fpSection3'), `${fp.hardwareConcurrency} ${i18n.t('editor.cpuCores')} · ${fp.deviceMemory} GB`, `
@@ -1045,13 +1045,13 @@ function tabFingerprint(p) {
       ${sw('fp.batterySpoof', fp.batterySpoof, i18n.t('editor.batterySpoof'), `${i18n.t('editor.batteryLevel', {n: (Math.round((fp.batteryLevel || 0.8) * 100))})}`)}
       <input type="range" data-bind="fp.batteryLevel" min="0.05" max="1" step="0.01" value="${fp.batteryLevel || 0.8}" style="width:100%">
       ${sw('fp.connectionSpoof', fp.connectionSpoof, i18n.t('editor.connectionSpoof'), '')}
-      <div class="hint">${'editor.deviceMemoryHint'}</div>
+      <div class="hint">${i18n.t('editor.deviceMemoryHint')}</div>
     `)}
 
     ${sec('gl', '🎨', i18n.t('editor.fpSection4'), `${fp.canvasNoise ? i18n.t('editor.canvasSummary', {level: (+fp.canvasNoiseLevel).toFixed(3)}) : i18n.t('editor.canvasOff')} · ${esc((fp.webglRenderer || '').slice(0, 46))}`, `
       ${sw('fp.canvasNoise', fp.canvasNoise, i18n.t('editor.canvasNoise'), i18n.t('editor.canvasNoiseHint'))}
       ${rng('fp.canvasNoiseLevel', i18n.t('editor.canvasNoiseLevel'), fp.canvasNoiseLevel || 0.02, 0.002, 0.12, 0.002, 'canvasLevel', v => (+v).toFixed(3))}
-      <div class="hint">${'editor.canvasNoiseDetail'}</div>
+      <div class="hint">${i18n.t('editor.canvasNoiseDetail')}</div>
       <hr class="sep">
       ${sw('fp.webglSpoof', fp.webglSpoof, i18n.t('editor.webglSpoof'), '')}
       <div class="grid2">
@@ -1059,22 +1059,22 @@ function tabFingerprint(p) {
         ${txt('fp.webglRenderer', i18n.t('editor.webglRendererLabel'), fp.webglRenderer, '')}
       </div>
       <div class="row wrap">
-        <button class="btn btn-sm" data-ed="gpuPreset">${'editor.gpuPresetsBtn'}</button>
+        <button class="btn btn-sm" data-ed="gpuPreset">${i18n.t('editor.gpuPresetsBtn')}</button>
         ${sw('fp.webglNoise', fp.webglNoise, i18n.t('editor.webglNoise'), '')}
         ${sw('fp.webgl2', fp.webgl2, i18n.t('editor.webgl2'), '')}
         ${sel('fp.webgpu', i18n.t('editor.webgpuLabel'), [{ v: 'auto', t: i18n.t('editor.webgpuAuto') }, { v: 'hide', t: i18n.t('editor.webgpuHide') }], fp.webgpu)}
       </div>
       ${txt('fp.webglVersion', i18n.t('editor.webglVersionLabel'), fp.webglVersion, i18n.t('editor.webglVersionPh'))}
-      <details><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${'editor.webglParamsTitle'}</summary>
+      <details><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${i18n.t('editor.webglParamsTitle')}</summary>
         <div id="glParams" style="margin-top:9px">${glParamsHTML(fp.webglParams || {})}</div>
-        <button class="btn btn-sm" data-ed="glParamAdd">${'editor.addParam'}</button></details>
-      <div class="hint">${'editor.gpuHint'}</div>
+        <button class="btn btn-sm" data-ed="glParamAdd">${i18n.t('editor.addParam')}</button></details>
+      <div class="hint">${i18n.t('editor.gpuHint')}</div>
     `)}
 
     ${sec('audio', '🔊', i18n.t('editor.fpSection5'), fp.audioNoise ? i18n.t('editor.audioSummaryOn') + (fp.audioNoiseLevel || 0).toExponential(1) : i18n.t('editor.audioSummaryOff'), `
       ${sw('fp.audioNoise', fp.audioNoise, i18n.t('editor.audioNoise'), i18n.t('editor.audioNoiseHint'))}
       ${rng('fp.audioNoiseLevel', i18n.t('editor.audioNoiseLevel'), fp.audioNoiseLevel || 0.0001, 0.00001, 0.0005, 0.00001, 'audioLevel', v => (+v).toExponential(1))}
-      <div class="hint">${'editor.audioLevelHint'}</div>
+      <div class="hint">${i18n.t('editor.audioLevelHint')}</div>
     `)}
 
     ${sec('net', '🛰️', i18n.t('editor.fpSection6'), fp.webrtcMode, `
@@ -1087,7 +1087,7 @@ function tabFingerprint(p) {
         ${txt('fp.webrtcPublicIp', i18n.t('editor.webrtcPublicIp'), fp.webrtcPublicIp, i18n.t('editor.webrtcPublicIpPh'))}
         ${txt('fp.webrtcLocalIps', i18n.t('editor.webrtcLocalIps'), (fp.webrtcLocalIps || []).join(', '), i18n.t('editor.webrtcLocalIpsPh'))}
       </div>
-      <div class="hint">${'editor.webrtcHint'}</div>
+      <div class="hint">${i18n.t('editor.webrtcHint')}</div>
       <hr class="sep">
       ${sw('fp.doNotTrack', fp.doNotTrack, i18n.t('editor.doNotTrack'), i18n.t('editor.doNotTrackHint'))}
       ${sw('fp.permissionsSpoof', fp.permissionsSpoof, i18n.t('editor.permissionsSpoof'), i18n.t('editor.permissionsSpoofHint'))}
@@ -1100,12 +1100,12 @@ function tabFingerprint(p) {
         { v: 'system', t: i18n.t('editor.fontsSystem') },
         { v: 'preset', t: i18n.t('editor.fontsPreset') },
         { v: 'strict', t: i18n.t('editor.fontsStrict') }], fp.fontsMode)}
-      <div class="field"><label>${'editor.fontsLabel'}</label>
+      <div class="field"><label>${i18n.t('editor.fontsLabel')}</label>
         <textarea data-bind="fp.fonts" rows="5">${esc((fp.fonts || []).join(', '))}</textarea>
-        <div class="hint">${'editor.fontsHint'}</div></div>
+        <div class="hint">${i18n.t('editor.fontsHint')}</div></div>
       <div class="row wrap">
-        <button class="btn btn-sm" data-ed="fontWin">${'editor.fontWin'}</button>
-        <button class="btn btn-sm" data-ed="fontMac">${'editor.fontMac'}</button>
+        <button class="btn btn-sm" data-ed="fontWin">${i18n.t('editor.fontWin')}</button>
+        <button class="btn btn-sm" data-ed="fontMac">${i18n.t('editor.fontMac')}</button>
         <button class="btn btn-sm" data-ed="fontLinux">${i18n.t('editor.fontLinux')}</button>
         <button class="btn btn-sm" data-ed="fontReal">${i18n.t('editor.fontReal')}</button>
       </div>
@@ -1542,10 +1542,10 @@ function viewRunning() {
   const list = S.running || [];
   return `<div class="view">
     <div class="view-head">
-      <div class="view-title"><h1>${'profile.statusRunning'}</h1><p>${i18n.t('running.subtitle')}</p></div>
+      <div class="view-title"><h1>${i18n.t('profile.statusRunning')}</h1><p>${i18n.t('running.subtitle')}</p></div>
       <div class="view-tools">
         <button class="btn" id="btnRefreshRun">${i18n.t('button.refresh')}</button>
-        <button class="btn btn-bad" id="btnCloseAll" ${list.length ? '' : 'disabled'}>${'running.closeAll'}</button>
+        <button class="btn btn-bad" id="btnCloseAll" ${list.length ? '' : 'disabled'}>${i18n.t('running.closeAll')}</button>
       </div>
     </div>
     <div class="view-body">
@@ -1561,24 +1561,24 @@ function viewRunning() {
             <span>PID</span><b>${r.pid}</b>
             <span>CDP</span><b title="${i18n.t('running.copyHint')}">${esc(r.http)}</b>
             <span>WebSocket</span><b class="ellipsis" title="${esc(r.ws)}">${esc((r.ws || '').slice(-34))}</b>
-            <span>${'running.injPages'}</span><b>i18n.t('running.injPagesFormat')</b>
+            <span>${i18n.t('running.injPages')}</span><b>${i18n.t('running.injPagesFormat')}</b>
             <span>${i18n.t('profile.proxy')}</span><b>${esc(r.proxy || i18n.t('misc.unknown'))}</b>
             ${r.lastError ? `<span>${i18n.t('profile.status')}</span><b style="color:var(--warn)">${esc(r.lastError)}</b>` : ''}
           </div>
           <div class="acts">
-            <button class="btn btn-sm" data-r="detect">${'running.fingerprintCheck'}</button>
+            <button class="btn btn-sm" data-r="detect">${i18n.t('running.fingerprintCheck')}</button>
             <button class="btn btn-sm" data-r="probe">${i18n.t('running.probe')}</button>
-            <button class="btn btn-sm" data-r="nav">${'running.openUrl'}</button>
-            <button class="btn btn-sm" data-r="copyws">${'running.copyCdp'}</button>
+            <button class="btn btn-sm" data-r="nav">${i18n.t('running.openUrl')}</button>
+            <button class="btn btn-sm" data-r="copyws">${i18n.t('running.copyCdp')}</button>
             <button class="btn btn-sm" data-r="edit">${i18n.t('common.edit')}</button>
             <div class="grow"></div>
-            <button class="btn btn-sm btn-bad" data-r="close">${'running.closeBtn'}</button>
+            <button class="btn btn-sm btn-bad" data-r="close">${i18n.t('running.closeBtn')}</button>
           </div>
         </div>`; }).join('')}</div>`
       : `<div class="empty"><div class="ic"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M4 4h11a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg></div>
-          <h3>${'toast.noRunningProfiles'}</h3>
-          <p>${'running.emptyHint'}</p>
-          <button class="btn btn-primary" id="btnGoProfiles">${'running.gotoProfiles'}</button></div>`}
+          <h3>${i18n.t('toast.noRunningProfiles')}</h3>
+          <p>${i18n.t('running.emptyHint')}</p>
+          <button class="btn btn-primary" id="btnGoProfiles">${i18n.t('running.gotoProfiles')}</button></div>`}
     </div></div>`;
 }
 function bindRunning(root) {
@@ -1670,15 +1670,15 @@ function showProbeResult(p, actual) {
     title: i18n.t('probe.titleFmt', {title: p ? '#' + p.seq + ' ' + p.name : i18n.t('misc.unnamed')}),
     subtitle: actual.ts ? new Date(actual.ts).toLocaleTimeString() : '', size: 'wide',
     body: `<div class="stack">
-      <div class="notice info">${'profile.probeInMain'}</div>
+      <div class="notice info">${i18n.t('profile.probeInMain')}</div>
       <div class="tbl-wrap"><table class="tbl" id="probeTable">
         <colgroup><col style="width:190px"><col><col style="width:30%"><col style="width:96px"></colgroup>
         <thead><tr><th>${i18n.t('profile.label')}</th><th>${i18n.t('profile.actual')}</th><th>${i18n.t('profile.expected')}</th><th>${i18n.t('profile.conclusion')}</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
-      <details class="fp-sec"><summary class="fp-head"><span class="ic">{ }</span><h4>${'profile.rawJson'}</h4><span class="d">${'profile.probeRawJson'}</span></summary>
+      <details class="fp-sec"><summary class="fp-head"><span class="ic">{ }</span><h4>${i18n.t('profile.rawJson')}</h4><span class="d">${i18n.t('profile.probeRawJson')}</span></summary>
         <div class="fp-body"><div class="code" style="max-height:320px">${esc(JSON.stringify(actual, null, 1))}</div></div></details>
     </div>`,
-    footer: `<div class="grow"></div><button class="btn" data-x>${'profile.copyJson'}</button><button class="btn btn-primary" data-close>${'dialog.completeBtn'}</button>`,
+    footer: `<div class="grow"></div><button class="btn" data-x>${i18n.t('profile.copyJson')}</button><button class="btn btn-primary" data-close>${i18n.t('dialog.completeBtn')}</button>`,
     onMount(api) { qs('[data-x]', api.box).onclick = () => copy(JSON.stringify(actual, null, 1), i18n.t('toast.jsonCopied')); }
   });
 }
@@ -1690,22 +1690,22 @@ function viewGroups() {
   return `<div class="view">
     <div class="view-head">
       <div class="view-title"><h1>${i18n.t('profile.group')}</h1><p>${i18n.t('group.subtitle')}</p></div>
-      <div class="view-tools"><button class="btn btn-primary" id="btnAddGroup">${'group.newGroup'}</button></div>
+      <div class="view-tools"><button class="btn btn-primary" id="btnAddGroup">${i18n.t('group.newGroup')}</button></div>
     </div>
     <div class="view-body"><div class="list" id="groupList">${groupListHTML()}</div></div></div>`;
 }
 const PALETTE = ['#7c8cff', '#3ddc97', '#ffb547', '#ff5c72', '#4fc3f7', '#ba68c8', '#f06292', '#9ccc65', '#ffd54f', '#90a4ae'];
 function groupListHTML() {
-  if (!S.groups.length) return `<div class="empty"><h3>${'toast.noGroups'}</h3><p>${'toast.noGroupsHint'}</p></div>`;
+  if (!S.groups.length) return `<div class="empty"><h3>${i18n.t('toast.noGroups')}</h3><p>${i18n.t('toast.noGroupsHint')}</p></div>`;
   return S.groups.map(g => {
     const n = S.profiles.filter(p => (p.veil ? p.veil.groupId : p.groupId) === g.id).length;
     return `<div class="li" data-id="${esc(g.id)}">
       <span class="swatch" style="background:${esc(g.color)}"></span>
       <div style="flex:1;min-width:0"><div class="nm">${esc(g.name)}</div><div class="sub">${esc(g.remark || i18n.t('group.remarkNone'))}</div></div>
-      <span class="badge">i18n.t('profile.nProfiles')</span>
+      <span class="badge">${i18n.t('profile.nProfiles')}</span>
       <button class="btn btn-sm" data-g="edit">${i18n.t('common.edit')}</button>
-      <button class="btn btn-sm" data-g="filter">${'button.filterProfile'}</button>
-      <button class="btn btn-sm btn-ghost" data-g="del">${'button.deleteAll'}</button></div>`;
+      <button class="btn btn-sm" data-g="filter">${i18n.t('button.filterProfile')}</button>
+      <button class="btn btn-sm btn-ghost" data-g="del">${i18n.t('button.deleteAll')}</button></div>`;
   }).join('');
 }
 function bindGroups(root) {
@@ -1749,7 +1749,7 @@ function viewTemplates() {
   return `<div class="view">
     <div class="view-head">
       <div class="view-title"><h1>${i18n.t('template.title')}</h1><p>${i18n.t('template.subtitle')}</p></div>
-      <div class="view-tools"><button class="btn" id="btnTplFromRandom">${'template.fromRandom'}</button></div>
+      <div class="view-tools"><button class="btn" id="btnTplFromRandom">${i18n.t('template.fromRandom')}</button></div>
     </div>
     <div class="view-body">
       ${list.length ? `<div class="cards">${list.map(t => `<div class="rcard" data-id="${esc(t.id)}" style="--x:1">
@@ -1758,18 +1758,18 @@ function viewTemplates() {
         <div class="meta">
           <span>${i18n.t('template.timezone')}</span><b>${esc(t.fp.timezone)}</b>
           <span>${i18n.t('template.languages')}</span><b>${esc((t.fp.languages || []).join(', '))}</b>
-          <span>${'probe.labelScreen'}</span><b>${t.fp.screenWidth}×${t.fp.screenHeight} @${t.fp.devicePixelRatio}x</b>
+          <span>${i18n.t('probe.labelScreen')}</span><b>${t.fp.screenWidth}×${t.fp.screenHeight} @${t.fp.devicePixelRatio}x</b>
           <span>${i18n.t('template.gpu')}</span><b class="ellipsis" title="${esc(t.fp.webglRenderer)}">${esc(t.fp.webglRenderer)}</b>
-          <span>${'template.cpuMemory'}</span><b>${t.fp.hardwareConcurrency} ${i18n.t('editor.cpuCores')} / ${t.fp.deviceMemory} GB</b>
-          <span>${'editor.fpSection7'}</span><b>i18n.t('editor.fontsCount')</b>
+          <span>${i18n.t('template.cpuMemory')}</span><b>${t.fp.hardwareConcurrency} ${i18n.t('editor.cpuCores')} / ${t.fp.deviceMemory} GB</b>
+          <span>${i18n.t('editor.fpSection7')}</span><b>${i18n.t('editor.fontsCount')}</b>
         </div>
         <div class="acts"><button class="btn btn-sm" data-t="apply">${i18n.t('button.apply')}</button>
           <button class="btn btn-sm" data-t="view">${i18n.t('button.view')}</button>
-          <div class="grow"></div><button class="btn btn-sm btn-ghost" data-t="del">${'button.deleteAll'}</button></div>
+          <div class="grow"></div><button class="btn btn-sm btn-ghost" data-t="del">${i18n.t('button.deleteAll')}</button></div>
       </div>`).join('')}</div>`
       : `<div class="empty"><div class="ic">🧬</div><h3>${i18n.t('toast.noTemplates')}</h3>
-         <p>${'template.firstTime'}</p>
-         <button class="btn btn-primary" id="btnTplFirst">${'template.fromRandom'}</button></div>`}
+         <p>${i18n.t('template.firstTime')}</p>
+         <button class="btn btn-primary" id="btnTplFirst">${i18n.t('template.fromRandom')}</button></div>`}
     </div></div>`;
 }
 function bindTemplates(root) {
@@ -1784,7 +1784,7 @@ function bindTemplates(root) {
       await Bridge.call('deleteTemplate', { id }); toast('ok', i18n.t('toast.deleted')); await refreshAll();
     } else if (k === 'view') {
       modal({ title: i18n.t('template.label') + t.name, size: 'mid', body: `<div class="code" style="max-height:60vh">${esc(JSON.stringify(t.fp, null, 1))}</div>`,
-        footer: `<div class="grow"></div><button class="btn" data-c>${i18n.t('button.copy')}</button><button class="btn btn-primary" data-close>${'running.closeBtn'}</button>`,
+        footer: `<div class="grow"></div><button class="btn" data-c>${i18n.t('button.copy')}</button><button class="btn btn-primary" data-close>${i18n.t('running.closeBtn')}</button>`,
         onMount(api) { qs('[data-c]', api.box).onclick = () => copy(JSON.stringify(t.fp, null, 1), i18n.t('toast.copied')); } });
     } else if (k === 'apply') {
       if (!S.profiles.length) { toast('warn', i18n.t('toast.templateApplyNoProfiles')); return; }
@@ -1820,12 +1820,12 @@ function viewDetect() {
     <div class="view-head">
       <div class="view-title"><h1>${i18n.t('detect.title')}</h1><p>${i18n.t('detect.subtitle')}</p></div>
       <div class="view-tools">
-        <button class="btn" id="btnOpenDetectPage">${'button.openDetectPage'}</button>
-        <button class="btn" id="btnProbeHost">${'button.probeHost'}</button>
+        <button class="btn" id="btnOpenDetectPage">${i18n.t('button.openDetectPage')}</button>
+        <button class="btn" id="btnProbeHost">${i18n.t('button.probeHost')}</button>
       </div>
     </div>
     <div class="view-body">
-      <div class="fp-sec open"><div class="fp-head"><span class="ic">🖥️</span><h4>${'detect.hostBaseline'}</h4>
+      <div class="fp-sec open"><div class="fp-head"><span class="ic">🖥️</span><h4>${i18n.t('detect.hostBaseline')}</h4>
         <span class="d">${hostOK ? i18n.t('detect.hostBaselineHidden') : i18n.t('detect.hostNotProbed')}</span></div>
         <div class="fp-body">
           ${hostOK ? `<div class="fp-grid">
@@ -1846,7 +1846,7 @@ function viewDetect() {
           </div>
           <details><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">detect.fontsListTitle</summary>
             <div class="chips" style="margin-top:8px">${(h.fonts || []).map(f => `<span class="chip">${esc(f)}</span>`).join('')}</div></details>
-          <details><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${'detect.webglParams'}</summary>
+          <details><summary style="cursor:pointer;color:var(--tx-3);font-size:11.5px;padding:4px 0">${i18n.t('detect.webglParams')}</summary>
             <div class="fp-grid" style="margin-top:8px">${Object.keys(h.webglParams || {}).map(k => kv(k, h.webglParams[k])).join('') || '<div class="hint">' + i18n.t('probe.cdcNone')}</div>'}</div></details>`
           : `<div class="empty" style="padding:30px"><h3>${i18n.t('toast.hostNotProbedYet')}</h3>
              <p>${i18n.t('detect.hostNotProbed')}<br>
@@ -1854,18 +1854,18 @@ function viewDetect() {
              <button class="btn btn-primary" id="btnProbeNow">${i18n.t('toast.probeNow')}</button></div>`}
         </div></div>
 
-      <div class="fp-sec open"><div class="fp-head"><span class="ic">🔍</span><h4>${'detect.windowSelfCheck'}</h4>
+      <div class="fp-sec open"><div class="fp-head"><span class="ic">🔍</span><h4>${i18n.t('detect.windowSelfCheck')}</h4>
         <span class="d">${S.running.length ? i18n.t('detect.runningCount', {n: S.running.length}) : i18n.t('detect.needRunning')}</span></div>
         <div class="fp-body">
           ${S.running.length ? `<div class="row wrap">${S.running.map(r =>
             `<button class="btn" data-probe="${esc(r.id)}">#${esc(r.seq)} ${esc(r.name)}</button>`).join('')}
             <div class="grow"></div>
-            <button class="btn btn-primary" data-probe="${esc(S.running[0].id)}">${'detect.runProbeArrow'}</button></div>
-            <div class="hint">${'detect.runProbeHint'}</div>`
-          : `<div class="notice warn">${'detect.openProfileFirst'}</div>`}
+            <button class="btn btn-primary" data-probe="${esc(S.running[0].id)}">${i18n.t('detect.runProbeArrow')}</button></div>
+            <div class="hint">${i18n.t('detect.runProbeHint')}</div>`
+          : `<div class="notice warn">${i18n.t('detect.openProfileFirst')}</div>`}
         </div></div>
 
-      <div class="fp-sec"><div class="fp-head"><span class="ic">⚠️</span><h4>i18n.t('detect.knownLimits')</h4><span class="d">i18n.t('detect.knownLimitsDesc')</span></div>
+      <div class="fp-sec"><div class="fp-head"><span class="ic">⚠️</span><h4>${i18n.t('detect.knownLimits')}</h4><span class="d">${i18n.t('detect.knownLimitsDesc')}</span></div>
         <div class="fp-body"><div class="stack">
           <div class="notice warn"><div>detect.tlsJa3</div></div>
           <div class="notice warn"><div>detect.fontMetrics</div></div>
@@ -1909,7 +1909,7 @@ function viewAPI() {
       </div>
     </div>
     <div class="view-body">
-      <div class="fp-sec open"><div class="fp-head"><span class="ic">⚡</span><h4>i18n.t('api.quickStart')</h4><span class="d">i18n.t('api.quickStartDesc')</span></div>
+      <div class="fp-sec open"><div class="fp-head"><span class="ic">⚡</span><h4>${i18n.t('api.quickStart')}</h4><span class="d">${i18n.t('api.quickStartDesc')}</span></div>
         <div class="fp-body">
           <div class="notice ok">api.cdpConnectStart
             api.cdpConnectMethods
@@ -1927,10 +1927,10 @@ function viewAPI() {
               <svg class="chev" viewBox="0 0 12 12" width="11" height="11" style="color:var(--tx-4);transition:transform .18s"><path fill="currentColor" d="M4.5 2.5 8 6l-3.5 3.5z"/></svg></div>
             <div class="ep-body" style="display:none">
               ${e.body ? `<div><div class="lbl">${i18n.t('api.requestBody')}</div><div class="code">${esc(e.body)}</div></div>` : ''}
-              <div><div class="lbl">${'dialog.curlExample'}</div>
+              <div><div class="lbl">${i18n.t('dialog.curlExample')}</div>
                 <div class="code-wrap"><button class="code-copy" data-copy>${i18n.t('button.copy')}</button>
                 <div class="code">${esc(e.example || `curl -s -X ${e.method} ${ai.base}${e.path} -H 'Content-Type: application/json' -d '${e.body || '{}'}'`)}</div></div></div>
-              <div class="row"><button class="btn btn-sm" data-try="${i}">${'button.tryRun'}</button><span class="hint">$${'api.tryRunning'}</span></div>
+              <div class="row"><button class="btn btn-sm" data-try="${i}">${i18n.t('button.tryRun')}</button><span class="hint">${i18n.t('api.tryRunning')}</span></div>
               <div class="tryout" id="tryout-${i}"></div>
             </div></div>`).join('')}
         </div></div></div>
@@ -1977,8 +1977,8 @@ function bindAPI(root) {
 function viewSettings() {
   const st = S.settings || {};
   return `<div class="view">
-    <div class="view-head"><div class="view-title"><h1>${'settings.title2'}</h1><p>i18n.t('settings.versionLine')</p></div>
-      <div class="view-tools"><button class="btn btn-primary" id="btnSaveSettings">${'button.save4'}</button></div></div>
+    <div class="view-head"><div class="view-title"><h1>${i18n.t('settings.title2')}</h1><p>${i18n.t('settings.versionLine')}</p></div>
+      <div class="view-tools"><button class="btn btn-primary" id="btnSaveSettings">${i18n.t('button.save4')}</button></div></div>
     <div class="view-body"><div class="stack">
       <!-- i18n: 界面语言选择（设置面板顶部；切换后由 AppSettings.locale 持久化，重启或下次启动生效） -->
       <div class="form-row">
@@ -1996,11 +1996,11 @@ function viewSettings() {
           ${num('apiPort', i18n.t('settings.apiPort'), st.apiPort || 54345, 'min="1024" max="65535"')}
           ${txt('apiToken', i18n.t('settings.apiToken'), st.apiToken || '', i18n.t('settings.apiTokenPh'))}
         </div>
-        <div class="hint">${'settings.apiPortHint'}</div>
+        <div class="hint">${i18n.t('settings.apiPortHint')}</div>
       `, true)}
 
       ${sec('browser', '🧭', i18n.t('settings.browserSection'), st.defaultBrowserPath || i18n.t('editor.autoSelect'), `
-        <div class="field"><label>${'settings.defaultBrowserPath'}</label>
+        <div class="field"><label>${i18n.t('settings.defaultBrowserPath')}</label>
           <div class="row"><select data-bind="defaultBrowserPath" style="flex:1">
             <option value="">${i18n.t('editor.autoSelect')}</option>
             ${(S.env.browsers || []).map(b => `<option value="${esc(b.path)}" ${st.defaultBrowserPath === b.path ? 'selected' : ''}>${esc(b.name)} ${esc(b.version || '')}</option>`).join('')}
@@ -2023,13 +2023,13 @@ function viewSettings() {
           : i18n.t('settings.notEncrypted')}</div></div>
         <div class="row wrap">
           <button class="btn" id="btnSetPwd">${st.masterPasswordEnabled ? i18n.t('button.modifyPassword') : i18n.t('button.setPassword')}</button>
-          <button class="btn" id="btnRevealData">${'button.openDataDir'}</button>
-          <button class="btn" id="btnExportAll">${'button.exportAll2'}</button>
-          <button class="btn" id="btnImportAll">${'button.importConfig'}</button>
+          <button class="btn" id="btnRevealData">${i18n.t('button.openDataDir')}</button>
+          <button class="btn" id="btnExportAll">${i18n.t('button.exportAll2')}</button>
+          <button class="btn" id="btnImportAll">${i18n.t('button.importConfig')}</button>
         </div>
         ${kv(i18n.t('editor.dataDir'), S.env.supportDir || '')}
         ${kv(i18n.t('settings.injectScript'), S.env.injectFrom || '')}
-        <div class="hint">${'settings.dataDirHint'}</div>
+        <div class="hint">${i18n.t('settings.dataDirHint')}</div>
       `)}
 
       ${sec('about', 'ℹ️', i18n.t('settings.aboutSection'), '', `
@@ -2040,7 +2040,7 @@ function viewSettings() {
           ${kv(i18n.t('settings.nativeBridge'), Bridge.native ? i18n.t('settings.nativeBridgeValue') : i18n.t('settings.httpBridge'))}
         </div>
         <div class="notice info"><div>${i18n.t('settings.aboutWhyNoExtFull')}</div></div>
-        <div class="row wrap"><button class="btn" id="btnOpenLog">${'button.viewLogs'}</button>
+        <div class="row wrap"><button class="btn" id="btnOpenLog">${i18n.t('button.viewLogs')}</button>
           <button class="btn" id="btnAbout">${i18n.t('button.about')}</button></div>
       `)}
     </div></div></div>`;
@@ -2061,8 +2061,18 @@ function bindSettings(root) {
   qs('#btnSaveSettings', root).onclick = async () => {
     // i18n: 把界面语言选择写入 settings.locale，确保持久化到 Swift 侧 AppSettings
     const localeEl = document.getElementById('settingLocale');
-    if (localeEl) S.settings.locale = localeEl.value || 'zh-CN';
-    try { await Bridge.call('saveSettings', { settings: S.settings }); toast('ok', i18n.t('toast.savedProbe')); S.env = await Bridge.call('env', {}); S.apiInfo = await Bridge.call('apiInfo', {}); updateChrome(); }
+    const newLocale = localeEl ? (localeEl.value || 'zh-CN') : (S.settings.locale || 'zh-CN');
+    const localeChanged = newLocale !== (S.settings.locale || 'zh-CN');
+    S.settings.locale = newLocale;
+    try {
+      await Bridge.call('saveSettings', { settings: S.settings });
+      toast('ok', i18n.t('toast.savedProbe'));
+      S.env = await Bridge.call('env', {});
+      S.apiInfo = await Bridge.call('apiInfo', {});
+      updateChrome();
+      // i18n 切换后立即重新渲染整个视图，让 dropdown 等 i18n.t() 派生文本跟着更新
+      if (localeChanged) renderView(true);
+    }
     catch (e) { toast('err', i18n.t('toast.saveProfileFailed'), String(e.message || e), 8000); }
   };
   qs('#btnPickBrowser2', root).onclick = async () => {
@@ -2088,11 +2098,11 @@ function bindSettings(root) {
 async function showLogs() {
   const r = await Bridge.call('logs', { tail: 800 });
   modal({ title: i18n.t('toast.runLogTitle'), subtitle: i18n.t('toast.runtimeLogSubtitle'), size: 'wide',
-    body: `<div class="row" style="margin-bottom:9px"><button class="btn btn-sm" id="lgCopy">i18n.t('settings.logCopyAll')</button>
-      <button class="btn btn-sm" id="lgReveal">i18n.t('settings.logReveal')</button><div class="grow"></div>
+    body: `<div class="row" style="margin-bottom:9px"><button class="btn btn-sm" id="lgCopy">${i18n.t('settings.logCopyAll')}</button>
+      <button class="btn btn-sm" id="lgReveal">${i18n.t('settings.logReveal')}</button><div class="grow"></div>
       <button class="btn btn-sm" id="lgRefresh">${i18n.t('button.refresh')}</button></div>
       <div class="code" id="logBox" style="max-height:58vh">${esc(r.text || i18n.t('toast.noLogs'))}</div>`,
-    footer: `<div class="grow"></div><button class="btn btn-primary" data-close>${'running.closeBtn'}</button>`,
+    footer: `<div class="grow"></div><button class="btn btn-primary" data-close>${i18n.t('running.closeBtn')}</button>`,
     onMount(api) {
       const box = qs('#logBox', api.box);
       qs('#lgCopy', api.box).onclick = () => copy(box.textContent, i18n.t('toast.copyLog'));
@@ -2105,12 +2115,12 @@ function showAbout() {
   const h = S.host || {};
   modal({ title: i18n.t('toast.aboutVeil'), subtitle: 'v' + (S.env.version || ''), size: '',
     body: `<div class="stack">
-      <div class="notice info"><div>i18n.t('settings.aboutVeil')</div></div>
+      <div class="notice info"><div>${i18n.t('settings.aboutVeil')}</div></div>
       <div class="fp-grid">${kv(i18n.t('settings.version'), S.env.version || '')}${kv(i18n.t('settings.arch'), S.env.arch || '')}
         ${kv(i18n.t('platform.mac'), S.env.macOS || '')}${kv(i18n.t('settings.localChrome'), h.chromeMajor || i18n.t('misc.unknown'))}
         ${kv(i18n.t('common.window'), String((S.stats || {}).total || 0))}${kv(i18n.t('profile.statusRunning'), String((S.stats || {}).running || 0))}</div>
-      <div class="hint">i18n.t('settings.dataHint')</div></div>`,
-    footer: `<div class="grow"></div><button class="btn btn-primary" data-close>i18n.t('settings.okBtn')</button>` });
+      <div class="hint">${i18n.t('settings.dataHint')}</div></div>`,
+    footer: `<div class="grow"></div><button class="btn btn-primary" data-close>${i18n.t('settings.okBtn')}</button>` });
 }
 
 /* ==========================================================================
@@ -2173,7 +2183,7 @@ async function boot() {
     try { S.gpuLists = await Bridge.call('gpuLists', {}); } catch (e) { S.gpuLists = {}; }
   } catch (e) {
     qs('#boot').innerHTML = `<div style="text-align:center;color:#ff8fa0;font:13px/1.7 var(--ff);max-width:520px">
-      <div style="font-size:15px;font-weight:600;margin-bottom:8px">${'toast.initFailed'}</div>${esc(String(e.message || e))}</div>`;
+      <div style="font-size:15px;font-weight:600;margin-bottom:8px">${i18n.t('toast.initFailed')}</div>${esc(String(e.message || e))}</div>`;
     return;
   }
   if (S.env.locked) {
@@ -2281,5 +2291,5 @@ window.addEventListener('error', ev => {
 
 boot().catch(e => {
   const b = qs('#boot');
-  if (b) b.innerHTML = `<div style="color:#ff8fa0;font:13px/1.7 var(--ff)">i18n.t('settings.bootFailed')</div>`;
+  if (b) b.innerHTML = `<div style="color:#ff8fa0;font:13px/1.7 var(--ff)">${i18n.t('settings.bootFailed')}</div>`;
 });
