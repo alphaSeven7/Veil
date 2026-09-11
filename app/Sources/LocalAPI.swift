@@ -52,6 +52,15 @@ public final class LocalAPI {
             if sub == "expect" { return await expectResponse(req) }
             if sub == "probe" { return HTTPResponse.html("<!doctype html><meta charset=utf-8><title>Veil Probe</title><body>Veil probe context") }
             if sub == "bridge" { return await bridgeCall(req) }
+            // i18n: 当前语言（供前端 i18n.js 启动时读取；走 AppSettings.locale）
+            if sub == "locale" {
+                let s = Store.shared.settings()
+                return ok(["locale": s.locale])
+            }
+            // i18n: 语言字典（locales/<lang>.json → StaticFiles.serve 已支持 locales/ 子目录）
+            if sub.hasPrefix("locales/") {
+                return StaticFiles.serve(sub, query: req.query)
+            }
             return StaticFiles.serve(sub, query: req.query)
         }
         if path == "/" || path == "/index.html" { return StaticFiles.serve("index.html", query: req.query) }
