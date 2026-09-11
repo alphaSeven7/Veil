@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<style>body{font:13px/1.75 -apple-system,"PingFang SC",sans-serif;color:#1d1d1f;padding:16px 20px}
+h1{font-size:18px;margin:0 0 10px}ol{padding-left:20px}li{margin:7px 0}
+code{font:11.5px ui-monospace,Menlo,monospace;background:#f2f2f5;padding:1px 5px;border-radius:4px}
+.box{background:#f0f7ff;border:1px solid #cfe0f5;border-radius:10px;padding:11px 13px;margin-top:14px;font-size:12px}</style></head><body>
+<h1>安装完成 ✓</h1>
+<ol>
+<li>在「应用程序」文件夹或 Spotlight 中打开 <b>Veil</b>。</li>
+<li>首次启动会静默探测本机 Chrome 的真实指纹（headless，不会弹出窗口），用于生成版本一致的伪装指纹。</li>
+<li>点击「新建窗口」创建第一个隔离环境，然后点 ▶ 打开。</li>
+<li>打开后在「指纹检测」页运行探针，逐项确认伪装是否生效。</li>
+</ol>
+<div class="box">
+<b>如果 Gatekeeper 拦截：</b>本应用为自签名构建。请在访达中<b>右键点击 Veil → 打开</b>；
+若仍被拦截，执行 <code>xattr -dr com.apple.quarantine /Applications/Veil.app</code>。<br><br>
+<b>本地 API：</b>默认 <code>http://127.0.0.1:54345</code>，接口协议兼容比特浏览器。用 <code>curl http://127.0.0.1:54345/health</code> 验证。<br><br>
+<b>数据目录：</b><code>~/Library/Application Support/Veil/</code>（含 <code>vault.json</code> 配置与 <code>profiles/</code> 浏览数据）。
+</div>
+</body></html>

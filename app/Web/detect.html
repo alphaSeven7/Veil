@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veil · 指纹自检</title>
+<style>
+:root{--bg:#0d0f14;--p:#151922;--p2:#1a1f2a;--p3:#202633;--l:#232a38;--l2:#2d3546;
+--t:#e7eaf2;--t2:#a8b0c2;--t3:#6f7889;--t4:#4d5566;--ac:#6c8cff;--ac2:#a06cff;
+--ok:#3ddc97;--wn:#ffb547;--bd:#ff5c72;
+--ff:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+--fm:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1000px 480px at 80% -10%,rgba(160,108,255,.08),transparent 60%),
+radial-gradient(800px 420px at 5% -8%,rgba(108,140,255,.09),transparent 60%),var(--bg);
+color:var(--t);font:13px/1.55 var(--ff);-webkit-font-smoothing:antialiased;padding:26px 22px 60px}
+.wrap{max-width:1120px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.logo{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none;
+background:linear-gradient(140deg,rgba(108,140,255,.2),rgba(160,108,255,.2));border:1px solid rgba(108,140,255,.34)}
+h1{margin:0;font-size:18px;font-weight:650;letter-spacing:-.01em}
+.sub{font-size:11.5px;color:var(--t3);margin-top:1px}
+.grow{flex:1}
+.btn{height:29px;padding:0 12px;border-radius:8px;background:var(--p2);border:1px solid var(--l2);color:var(--t2);
+font:520 12.5px var(--ff);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--p3);color:var(--t)}
+.btn.p{background:linear-gradient(135deg,#5f80f5,#8a63ee);border-color:rgba(140,160,255,.5);color:#fff}
+.score{display:flex;align-items:center;gap:16px;padding:15px 18px;border-radius:15px;margin-bottom:16px;
+background:linear-gradient(160deg,var(--p2),var(--p));border:1px solid var(--l);flex-wrap:wrap}
+.ring{width:78px;height:78px;flex:none;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ring .num b{font:680 21px/1 var(--ff)}
+.ring .num i{font:500 9.5px/1 var(--ff);color:var(--t4);font-style:normal;margin-top:3px}
+.sc-txt h2{margin:0 0 4px;font-size:15px;font-weight:620}
+.sc-txt p{margin:0;font-size:12px;color:var(--t3);max-width:640px;line-height:1.65}
+.pills{display:flex;gap:7px;margin-left:auto;flex-wrap:wrap}
+.pill{padding:5px 10px;border-radius:20px;font:560 11px var(--ff);border:1px solid}
+.pill.ok{background:rgba(61,220,151,.12);border-color:rgba(61,220,151,.3);color:var(--ok)}
+.pill.bd{background:rgba(255,92,114,.12);border-color:rgba(255,92,114,.3);color:var(--bd)}
+.pill.nu{background:var(--p2);border-color:var(--l2);color:var(--t3)}
+.card{border:1px solid var(--l);border-radius:14px;background:var(--p);margin-bottom:12px;overflow:hidden}
+.card>h3{margin:0;padding:11px 14px;font-size:12px;font-weight:620;letter-spacing:.06em;text-transform:uppercase;
+color:var(--t3);background:linear-gradient(90deg,var(--p2),var(--p));border-bottom:1px solid var(--l);
+display:flex;align-items:center;gap:8px}
+.card>h3 .d{font-weight:400;text-transform:none;letter-spacing:0;color:var(--t4);font-size:11.5px;margin-left:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{text-align:left;padding:8px 12px;font:600 10px var(--ff);color:var(--t4);letter-spacing:.07em;text-transform:uppercase;
+border-bottom:1px solid var(--l);background:rgba(0,0,0,.16);position:sticky;top:0}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.045);font-size:12px;color:var(--t2);vertical-align:top;
+word-break:break-all;overflow-wrap:anywhere}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:rgba(255,255,255,.018)}
+td.k{color:var(--t3);width:210px}
+td.v{font:500 11.5px/1.6 var(--fm);color:var(--t)}
+td.e{font:500 11.5px/1.6 var(--fm);color:var(--t3);width:290px}
+td.s{width:82px;text-align:right}
+.b{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:20px;font:560 10.5px var(--ff);border:1px solid;white-space:nowrap}
+.b.ok{background:rgba(61,220,151,.12);border-color:rgba(61,220,151,.3);color:var(--ok)}
+.b.bd{background:rgba(255,92,114,.12);border-color:rgba(255,92,114,.3);color:var(--bd)}
+.b.nu{background:var(--p2);border-color:var(--l2);color:var(--t3)}
+.b.wn{background:rgba(255,181,71,.12);border-color:rgba(255,181,71,.3);color:var(--wn)}
+pre{margin:0;padding:13px;background:#0a0c11;border-top:1px solid var(--l);font:11px/1.65 var(--fm);color:#c3cbdb;
+overflow:auto;max-height:420px;white-space:pre-wrap;word-break:break-all;user-select:text}
+.note{padding:11px 14px;font-size:11.5px;line-height:1.7;border-radius:11px;margin-bottom:12px}
+.note.wn{background:rgba(255,181,71,.09);border:1px solid rgba(255,181,71,.26);color:#ffd08a}
+.note.if{background:rgba(108,140,255,.09);border:1px solid rgba(108,140,255,.26);color:#a9bcff}
+.note code{font-family:var(--fm);background:rgba(0,0,0,.3);padding:1px 5px;border-radius:4px;font-size:11px}
+.links{display:flex;gap:7px;flex-wrap:wrap}
+.links a{color:var(--ac);text-decoration:none;font-size:12px;padding:6px 11px;border-radius:8px;
+background:var(--p2);border:1px solid var(--l2);transition:.15s}
+.links a:hover{border-color:rgba(108,140,255,.4);color:#9db4ff}
+.spin{width:15px;height:15px;border:2px solid var(--l2);border-top-color:var(--ac);border-radius:50%;animation:s .7s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.load{display:flex;align-items:center;justify-content:center;gap:10px;padding:60px;color:var(--t3)}
+canvas.pp{display:none}
+.foot{margin-top:20px;font-size:11px;color:var(--t4);text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" width="19" height="19">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c9cff"/><stop offset="100%" stop-color="#b06cff"/></linearGradient></defs>
+      <path d="M12 2.2 4.4 5.3v6.1c0 4.6 3.1 8.9 7.6 10.4 4.5-1.5 7.6-5.8 7.6-10.4V5.3L12 2.2Z" fill="url(#g)" opacity=".2"/>
+      <path d="M12 2.2 4.4 5.3v6.1c0 4.6 3.1 8.9 7.6 10.4 4.5-1.5 7.6-5.8 7.6-10.4V5.3L12 2.2Z" fill="none" stroke="url(#g)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M8.7 11.9l2.4 2.4 4.3-4.6" fill="none" stroke="url(#g)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><h1>Veil 指纹自检</h1><div class="sub" id="sub">正在采集…</div></div>
+    <div class="grow"></div>
+    <button class="btn" id="btnCopy">复制 JSON</button>
+    <button class="btn p" id="btnRe">↻ 重新检测</button>
+  </header>
+  <div id="root"><div class="load"><div class="spin"></div>正在采集指纹特征…</div></div>
+  <canvas class="pp" id="pp" width="260" height="48"></canvas>
+</div>
+<script>
+const QS = new URLSearchParams(location.search);
+const PID = QS.get('profile') || '';
+let RAW = null, EXP = null;
+
+function djb2(s){let h=5381;for(let i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;return h.toString(16);}
+
+async function collect(){
+  const R={};
+  R.ua=navigator.userAgent; R.appVersion=navigator.appVersion;
+  R.platform=navigator.platform; R.vendor=navigator.vendor;
+  R.language=navigator.language; R.languages=Array.from(navigator.languages||[]);
+  R.hardwareConcurrency=navigator.hardwareConcurrency; R.deviceMemory=navigator.deviceMemory;
+  R.maxTouchPoints=navigator.maxTouchPoints; R.doNotTrack=navigator.doNotTrack; R.webdriver=navigator.webdriver;
+  R.plugins=navigator.plugins?navigator.plugins.length:-1;
+  R.pluginNames=navigator.plugins?Array.from(navigator.plugins).map(p=>p.name):[];
+  R.mimeTypes=navigator.mimeTypes?navigator.mimeTypes.length:-1;
+  R.screen=[screen.width,screen.height,screen.availWidth,screen.availHeight,screen.colorDepth,screen.pixelDepth];
+  R.dpr=window.devicePixelRatio; R.outer=[outerWidth,outerHeight]; R.inner=[innerWidth,innerHeight];
+  R.orientation=screen.orientation?screen.orientation.type+':'+screen.orientation.angle:null;
+  R.timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  R.tzOffset=new Date().getTimezoneOffset(); R.localTime=new Date().toLocaleString();
+  // Canvas（读两次，验证稳定性）
+  R.canvas=[];
+  for(let k=0;k<2;k++){
+    const c=document.createElement('canvas');c.width=260;c.height=48;
+    const x=c.getContext('2d');x.textBaseline='alphabetic';
+    x.fillStyle='#f60';x.fillRect(0,0,140,22);
+    x.font='18px Arial';x.fillStyle='#069';x.fillText('Veil fp \u{1F512} probe',3,36);
+    x.font='14px Georgia';x.strokeStyle='#f0f';x.strokeText('canvas fingerprint',60,14);
+    x.globalCompositeOperation='multiply';x.fillStyle='#0ff';x.beginPath();x.arc(200,24,18,0,7);x.fill();
+    R.canvas.push(djb2(c.toDataURL()));
+  }
+  // WebGL
+  try{
+    const gl=document.createElement('canvas').getContext('webgl');
+    if(gl){const d=gl.getExtension('WEBGL_debug_renderer_info');
+      R.gl={vendor:gl.getParameter(gl.VENDOR),renderer:gl.getParameter(gl.RENDERER),
+        uv:d?gl.getParameter(d.UNMASKED_VENDOR_WEBGL):null,ur:d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):null,
+        version:gl.getParameter(gl.VERSION),slv:gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+        maxTex:gl.getParameter(gl.MAX_TEXTURE_SIZE),
+        maxVp:Array.from(gl.getParameter(gl.MAX_VIEWPORT_DIMS)||[]).join(','),
+        ext:(gl.getSupportedExtensions()||[]).length,hasDebug:!!d};
+      R.gl2=!!document.createElement('canvas').getContext('webgl2');
+    } else R.gl='NO_WEBGL';
+  }catch(e){R.gl='ERR:'+e.message}
+  // Audio
+  R.audio=[];
+  try{
+    const AC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    for(let k=0;k<2;k++){
+      const ctx=new AC(1,44100,44100);
+      const osc=ctx.createOscillator();osc.type='triangle';osc.frequency.value=10000;
+      const comp=ctx.createDynamicsCompressor();
+      [[comp.threshold,-50],[comp.knee,40],[comp.ratio,12],[comp.attack,0.001],[comp.release,0.25]]
+        .forEach(([p,v])=>{try{p.setValueAtTime(v,0)}catch(e){}});
+      osc.connect(comp);comp.connect(ctx.destination);osc.start(0);
+      const buf=await ctx.startRendering();const d=buf.getChannelData(0);
+      let s=0;for(let i=4500;i<5000;i++)s+=Math.abs(d[i]);
+      R.audio.push(s.toFixed(10));
+    }
+  }catch(e){R.audio=['ERR:'+e.message]}
+  // WebRTC 本地 IP 泄漏
+  R.webrtc=await new Promise(res=>{
+    let done=false;const t=setTimeout(()=>{if(!done){done=true;res('无候选（已屏蔽 / 超时）')}},3500);
+    try{
+      const pc=new RTCPeerConnection({iceServers:[]});
+      pc.createDataChannel('');
+      pc.onicecandidate=e=>{if(done||!e.candidate)return;
+        const m=/([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9:]{2,}:[a-f0-9:.]+)/i.exec(e.candidate.candidate);
+        if(m){done=true;clearTimeout(t);res(m[1]);}};
+      pc.createOffer().then(o=>pc.setLocalDescription(o)).catch(()=>{if(!done){done=true;clearTimeout(t);res('ERR')}});
+    }catch(e){done=true;clearTimeout(t);res('不可用: '+e.message)}
+  });
+  // 电池 / 存储 / 网络
+  try{const b=await navigator.getBattery();R.battery={level:b.level,charging:b.charging};}catch(e){R.battery='ERR:'+e.message}
+  try{R.storage=await navigator.storage.estimate();}catch(e){R.storage='ERR:'+e.message}
+  R.connection=navigator.connection?{t:navigator.connection.effectiveType,d:navigator.connection.downlink,r:navigator.connection.rtt,s:navigator.connection.saveData}:null;
+  // UA-CH
+  try{
+    R.uaData=navigator.userAgentData?{brands:navigator.userAgentData.brands,mobile:navigator.userAgentData.mobile,platform:navigator.userAgentData.platform}:null;
+    if(navigator.userAgentData){R.uaDataHigh=await navigator.userAgentData.getHighEntropyValues(
+      ['fullVersionList','platformVersion','architecture','bitness','model','wow64','uaFullVersion']);}
+  }catch(e){R.uaData='ERR:'+e.message}
+  // 权限一致性
+  try{R.notificationPermission=Notification.permission;
+    R.permNotifications=(await navigator.permissions.query({name:'notifications'})).state;}catch(e){}
+  // 媒体设备
+  try{const d=await navigator.mediaDevices.enumerateDevices();
+    R.devices={total:d.length,in:d.filter(x=>x.kind==='audioinput').length,out:d.filter(x=>x.kind==='audiooutput').length,video:d.filter(x=>x.kind==='videoinput').length};}catch(e){R.devices='ERR:'+e.message}
+  // 语音 / 字体
+  try{R.voices=speechSynthesis.getVoices().length;}catch(e){R.voices=-1}
+  R.fontProbe=['Arial','Helvetica','Times New Roman','Courier New','Comic Sans MS','Impact','Segoe UI','PingFang SC','Menlo','DejaVu Sans','Ubuntu','Cambria']
+    .filter(f=>document.fonts.check('16px "'+f+'"'));
+  // 自动化痕迹
+  R.automationMarks=Object.keys(window).filter(k=>/cdc_|\$cdc_|webdriver|selenium|puppeteer|playwright|__driver|domAutomation/i.test(k));
+  R.chromeObj={has:!!window.chrome,runtime:!!(window.chrome&&window.chrome.runtime),app:!!(window.chrome&&window.chrome.app)};
+  R.nativeToString={
+    canvasToDataURL:HTMLCanvasElement.prototype.toDataURL.toString().indexOf('[native code]')>=0,
+    webglGetParam:(WebGLRenderingContext&&WebGLRenderingContext.prototype.getParameter)?WebGLRenderingContext.prototype.getParameter.toString().indexOf('[native code]')>=0:null,
+    screenWidthGetter:(()=>{const d=Object.getOwnPropertyDescriptor(Screen.prototype,'width');return d&&d.get?d.get.toString().indexOf('[native code]')>=0:null})(),
+    fnToString:Function.prototype.toString.toString().indexOf('[native code]')>=0
+  };
+  R.ts=Date.now();
+  return R;
+}
+
+const ROWS=[
+ {g:'基础',k:'User-Agent',a:r=>r.ua,e:x=>x.userAgent,c:(a,e)=>a===e},
+ {g:'基础',k:'navigator.platform',a:r=>r.platform,e:x=>x.platform,c:(a,e)=>a===e},
+ {g:'基础',k:'navigator.languages',a:r=>(r.languages||[]).join(', '),e:x=>(x.languages||[]).join(', '),c:(a,e)=>a===e},
+ {g:'基础',k:'Intl 时区',a:r=>r.timezone,e:x=>x.timezone,c:(a,e)=>a===e},
+ {g:'基础',k:'getTimezoneOffset',a:r=>r.tzOffset+' 分钟',e:()=>null},
+ {g:'基础',k:'navigator.webdriver',a:r=>String(r.webdriver),e:()=>'false',c:a=>a==='false'},
+ {g:'基础',k:'hardwareConcurrency',a:r=>r.hardwareConcurrency,e:x=>x.hardwareConcurrency,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'deviceMemory',a:r=>r.deviceMemory,e:x=>x.deviceMemory,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'maxTouchPoints',a:r=>r.maxTouchPoints,e:x=>x.maxTouchPoints,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'Do Not Track',a:r=>r.doNotTrack===null?'null':r.doNotTrack,e:x=>x.doNotTrack?'1':'null'},
+ {g:'屏幕',k:'screen 尺寸',a:r=>r.screen.slice(0,2).join(' × '),e:x=>x.screen?x.screen.slice(0,2).join(' × '):null,c:(a,e)=>a===e},
+ {g:'屏幕',k:'可用区域',a:r=>r.screen.slice(2,4).join(' × '),e:x=>x.screen?(x.screen[0]+' × '+(x.screen[1]-(x.availTopOffset||0))):null,c:(a,e)=>a===e},
+ {g:'屏幕',k:'色深',a:r=>r.screen[4],e:x=>x.screen?x.screen[2]:null},
+ {g:'屏幕',k:'devicePixelRatio',a:r=>r.dpr,e:x=>x.devicePixelRatio,c:(a,e)=>String(a)===String(e)},
+ {g:'屏幕',k:'window.outer',a:r=>r.outer.join(' × '),e:()=>null},
+ {g:'图形',k:'WebGL UNMASKED_VENDOR',a:r=>r.gl&&r.gl.uv,e:x=>x.webglVendor,c:(a,e)=>a===e},
+ {g:'图形',k:'WebGL UNMASKED_RENDERER',a:r=>r.gl&&r.gl.ur,e:x=>x.webglRenderer,c:(a,e)=>a===e},
+ {g:'图形',k:'WebGL VENDOR / RENDERER',a:r=>r.gl?(r.gl.vendor+' / '+r.gl.renderer):r.gl,e:()=>null},
+ {g:'图形',k:'MAX_TEXTURE_SIZE',a:r=>r.gl&&r.gl.maxTex,e:()=>null},
+ {g:'图形',k:'WebGL2',a:r=>String(!!r.gl2),e:()=>null},
+ {g:'图形',k:'Canvas 指纹（两次读取）',a:r=>(r.canvas||[]).join(' / '),e:x=>x.canvasNoise?'应两次一致':null,c:(a,e,r)=>r.canvas&&r.canvas[0]===r.canvas[1]},
+ {g:'音频',k:'AudioContext 指纹（两次）',a:r=>(r.audio||[]).join(' / '),e:x=>x.audioNoise?'应两次一致':null,c:(a,e,r)=>r.audio&&r.audio.length===2&&r.audio[0]===r.audio[1]},
+ {g:'网络',k:'WebRTC 本地 IP',a:r=>r.webrtc,e:x=>x.webrtcMode,c:(a,e,r)=>{
+    if(!e)return null; if(e==='disabled')return /无候选|超时|不可用/.test(String(a));
+    if(e==='real')return true; return true;}},
+ {g:'网络',k:'connection.effectiveType',a:r=>r.connection?r.connection.t:'—',e:()=>null},
+ {g:'设备',k:'媒体设备 (in/out/video)',a:r=>r.devices&&typeof r.devices==='object'?r.devices.in+'/'+r.devices.out+'/'+r.devices.video:r.devices,e:()=>null},
+ {g:'设备',k:'plugins.length',a:r=>r.plugins,e:x=>String(x.pluginsCount!==undefined?5:0),c:()=>null},
+ {g:'设备',k:'语音合成数量',a:r=>r.voices,e:()=>null},
+ {g:'设备',k:'字体探测命中',a:r=>(r.fontProbe||[]).join(', ')|| '（无）',e:x=>x.fontsMode?('策略: '+x.fontsMode):null,
+   c:(a,e,r,x)=>{ if(!x||x.fontsMode!=='strict') return null;
+     const allowed=new Set((x.fonts||[]).map(f=>f.toLowerCase()));
+     ['arial','helvetica','times new roman','courier new','verdana','tahoma','georgia'].forEach(f=>allowed.add(f));
+     return (r.fontProbe||[]).every(f=>allowed.has(f.toLowerCase())); }},
+ {g:'设备',k:'电池',a:r=>r.battery&&typeof r.battery==='object'?Math.round(r.battery.level*100)+'% '+(r.battery.charging?'充电中':'放电'):r.battery,e:()=>null},
+ {g:'存储',k:'storage 配额',a:r=>r.storage&&r.storage.quota?(r.storage.quota/1073741824).toFixed(1)+' GB':'—',e:()=>null},
+ {g:'反检测',k:'自动化残留全局变量',a:r=>(r.automationMarks||[]).join(', ')||'无',e:()=>'无',c:a=>a==='无'},
+ {g:'反检测',k:'window.chrome.runtime',a:r=>String(!!r.chromeObj.runtime),e:()=>'false'},
+ {g:'反检测',k:'toDataURL 伪装为原生',a:r=>String(r.nativeToString.canvasToDataURL),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'WebGL getParameter 伪装为原生',a:r=>String(r.nativeToString.webglGetParam),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'screen.width getter 伪装为原生',a:r=>String(r.nativeToString.screenWidthGetter),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'Function.toString 伪装为原生',a:r=>String(r.nativeToString.fnToString),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'Permissions 与 Notification 一致',a:r=>(r.permNotifications||'?')+' / '+(r.notificationPermission||'?'),e:()=>null,
+   c:(a,e,r)=>!r.permNotifications||r.permNotifications==='prompt'||(r.permNotifications==='denied'&&r.notificationPermission==='denied')||(r.permNotifications==='granted'&&r.notificationPermission==='granted')},
+];
+const UA_DATA=[
+ {k:'UA-CH brands',a:r=>r.uaData?(r.uaData.brands||[]).map(b=>b.brand+';v="'+b.version+'"').join(', '):'不可用（非安全上下文）'},
+ {k:'UA-CH fullVersionList',a:r=>r.uaDataHigh?(r.uaDataHigh.fullVersionList||[]).map(b=>b.brand+' '+b.version).join(' | '):'—'},
+ {k:'UA-CH platform / version',a:r=>r.uaDataHigh?(r.uaDataHigh.platform+' '+r.uaDataHigh.platformVersion):'—'},
+ {k:'UA-CH arch / bitness',a:r=>r.uaDataHigh?((r.uaDataHigh.architecture||'—')+' / '+(r.uaDataHigh.bitness||'—')):'—'},
+ {k:'UA-CH model / wow64 / mobile',a:r=>r.uaDataHigh?(JSON.stringify(r.uaDataHigh.model)+' / '+r.uaDataHigh.wow64+' / '+r.uaDataHigh.mobile):'—'},
+];
+
+function esc(s){return s===null||s===undefined?'':String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function render(){
+  const root=document.getElementById('root');
+  if(!RAW){root.innerHTML='<div class="load"><div class="spin"></div>采集失败</div>';return;}
+  let pass=0,fail=0,na=0;
+  const groups={};
+  ROWS.forEach(r=>{
+    let a,e,st=null;
+    try{a=r.a(RAW)}catch(x){a='ERR'}
+    try{e=r.e(EXP||{})}catch(x){e=null}
+    if(r.c){const v=r.c(a,e,RAW,EXP||{});st=(v===null||v===undefined)?null:!!v;}
+    else if(e!==null&&e!==undefined){st=String(a)===String(e); }
+    if(st===true)pass++; else if(st===false)fail++; else na++;
+    (groups[r.g]=groups[r.g]||[]).push({...r,a,e,st});
+  });
+  const total=pass+fail, pct=total?Math.round(pass/total*100):100;
+  const color=pct>=95?'var(--ok)':pct>=75?'var(--wn)':'var(--bd)';
+  const C=2*Math.PI*34;
+
+  let html=`
+  <div class="score">
+    <div class="ring"><svg width="78" height="78" viewBox="0 0 78 78">
+      <circle cx="39" cy="39" r="34" fill="none" stroke="#232a38" stroke-width="6"/>
+      <circle cx="39" cy="39" r="34" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round"
+        stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/></svg>
+      <div class="num"><b style="color:${color}">${pct}%</b><i>一致性</i></div></div>
+    <div class="sc-txt">
+      <h2>${fail===0?'全部可校验项均与配置一致':`${fail} 项与配置不一致`}</h2>
+      <p>${EXP&&EXP.name?`当前窗口：<b>#${esc(EXP.seq)} ${esc(EXP.name)}</b> · 期望伪装为 ${esc(EXP.timezone||'')} 的 ${esc(EXP.userAgent||'').slice(0,60)}…`
+        :'未关联窗口配置（直接访问自检页），因此只显示实测值，不做一致性判定。'}
+        共校验 ${total} 项、参考 ${na} 项。反检测的关键不只是「改成了什么」，还包括<b>两次读取是否稳定</b>与<b>toString 是否伪装为原生</b>。</p>
+    </div>
+    <div class="pills">
+      <span class="pill ok">✓ 符合 ${pass}</span>
+      <span class="pill ${fail?'bd':'nu'}">✕ 不符 ${fail}</span>
+      <span class="pill nu">— 参考 ${na}</span>
+    </div>
+  </div>`;
+
+  if(EXP&&EXP.proxy&&EXP.proxy!=='不使用代理'){
+    html+=`<div class="note if">该窗口配置了代理：<code>${esc(EXP.proxy)}</code>。IP 与地区是否匹配，请以「外部验证」中的 IP 检测站为准。</div>`;
+  }
+  if(fail>0){
+    html+=`<div class="note wn"><b>有 ${fail} 项不一致</b>。常见原因：① 页面在 Veil 注入之前就已加载（重新刷新本页即可）；② 该窗口不是由 Veil 启动的；③ 配置被手动改成了互相矛盾的值。</div>`;
+  }
+
+  for(const g of Object.keys(groups)){
+    html+=`<div class="card"><h3>${esc(g)}<span class="d">${groups[g].length} 项</span></h3>
+      <table><colgroup><col style="width:210px"><col><col style="width:290px"><col style="width:82px"></colgroup>
+      <thead><tr><th>检测项</th><th>页面实际值</th><th>配置期望值</th><th style="text-align:right">结论</th></tr></thead><tbody>`;
+    groups[g].forEach(r=>{
+      const badge=r.st===null?'<span class="b nu">参考</span>':r.st?'<span class="b ok">符合</span>':'<span class="b bd">不符</span>';
+      html+=`<tr><td class="k">${esc(r.k)}</td><td class="v">${esc(fmt(r.a))}</td><td class="e">${r.e===null||r.e===undefined?'—':esc(fmt(r.e))}</td><td class="s">${badge}</td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  html+=`<div class="card"><h3>Client Hints（sec-ch-ua*）<span class="d">需要安全上下文（https 或 localhost）</span></h3>
+    <table><colgroup><col style="width:210px"><col></colgroup><tbody>
+    ${UA_DATA.map(r=>{let v;try{v=r.a(RAW)}catch(e){v='ERR'}return `<tr><td class="k">${esc(r.k)}</td><td class="v">${esc(fmt(v))}</td></tr>`}).join('')}
+    </tbody></table></div>`;
+
+  html+=`<div class="card"><h3>外部验证<span class="d">在新标签打开，检查第三方风控视角</span></h3>
+    <div style="padding:13px"><div class="links">
+      <a href="https://browserleaks.com/javascript" target="_blank" rel="noopener">BrowserLeaks · JavaScript</a>
+      <a href="https://browserleaks.com/canvas" target="_blank" rel="noopener">BrowserLeaks · Canvas</a>
+      <a href="https://browserleaks.com/webgl" target="_blank" rel="noopener">BrowserLeaks · WebGL</a>
+      <a href="https://browserleaks.com/fonts" target="_blank" rel="noopener">BrowserLeaks · Fonts</a>
+      <a href="https://browserleaks.com/webrtc" target="_blank" rel="noopener">BrowserLeaks · WebRTC</a>
+      <a href="https://browserleaks.com/ip" target="_blank" rel="noopener">BrowserLeaks · IP</a>
+      <a href="https://pixelscan.net" target="_blank" rel="noopener">PixelScan</a>
+      <a href="https://whoer.net" target="_blank" rel="noopener">Whoer</a>
+      <a href="https://iphey.com" target="_blank" rel="noopener">Iphey</a>
+      <a href="https://bot.sannysoft.com" target="_blank" rel="noopener">Bot 检测</a>
+      <a href="https://www.browserscan.net/zh/fingerprint-detection" target="_blank" rel="noopener">BrowserScan</a>
+      <a href="https://amiunique.org/fp" target="_blank" rel="noopener">AmIUnique</a>
+    </div></div></div>`;
+
+  html+=`<div class="card"><h3>原始 JSON<span class="d">完整采集结果</span></h3><pre>${esc(JSON.stringify(RAW,null,1))}</pre></div>`;
+
+  html+=`<div class="foot">Veil __VEIL_VERSION__ · 采集于 ${new Date(RAW.ts).toLocaleString()} · 本页面由 Veil 本地服务提供（127.0.0.1）</div>`;
+  root.innerHTML=html;
+  document.getElementById('sub').textContent =
+    (EXP&&EXP.name?`窗口 #${EXP.seq} ${EXP.name} · `:'')+`${RAW.timezone} · ${RAW.screen[0]}×${RAW.screen[1]} · 一致性 ${pct}%`;
+}
+function fmt(v){
+  if(v===null||v===undefined)return '—';
+  if(typeof v==='object')return JSON.stringify(v);
+  return String(v);
+}
+
+async function run(){
+  document.getElementById('root').innerHTML='<div class="load"><div class="spin"></div>正在采集指纹特征…</div>';
+  EXP=null;
+  if(PID){ try{ const r=await (await fetch('/__veil/expect?profile='+encodeURIComponent(PID))).json(); EXP=r.data||null; }catch(e){} }
+  try{ RAW=await collect(); }catch(e){ RAW={error:String(e.message||e),ts:Date.now()}; }
+  render();
+}
+document.getElementById('btnRe').onclick=run;
+document.getElementById('btnCopy').onclick=()=>{
+  const t=JSON.stringify(RAW,null,1);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>{
+    document.getElementById('btnCopy').textContent='已复制 ✓';
+    setTimeout(()=>document.getElementById('btnCopy').textContent='复制 JSON',1400);
+  });
+  else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+};
+run();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Veil 安装后处理
+set -e
+APP="/Applications/Veil.app"
+
+# 1. 清除隔离属性（自签名构建，避免 Gatekeeper 直接拒绝）
+if [ -d "$APP" ]; then
+  /usr/bin/xattr -dr com.apple.quarantine "$APP" 2>/dev/null || true
+  /usr/bin/xattr -cr "$APP" 2>/dev/null || true
+fi
+
+# 2. 确保数据目录存在且属主为触发安装的用户
+TARGET_USER="$USER"
+if [ -n "$SUDO_USER" ]; then TARGET_USER="$SUDO_USER"; fi
+if [ "$TARGET_USER" = "root" ] && [ -n "$USER" ]; then TARGET_USER="$USER"; fi
+HOME_DIR=$( /usr/bin/dscl . -read /Users/"$TARGET_USER" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}' )
+if [ -n "$HOME_DIR" ]; then
+  DATA="$HOME_DIR/Library/Application Support/Veil"
+  /bin/mkdir -p "$DATA/profiles" "$DATA/logs" 2>/dev/null || true
+  /usr/sbin/chown -R "$TARGET_USER":staff "$DATA" 2>/dev/null || true
+fi
+
+# 3. 注册 Launch Services
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+  -f "$APP" 2>/dev/null || true
+
+exit 0

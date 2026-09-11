@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Veil 指纹浏览器</title>
+    <organization>com.veil</organization>
+    <allowedOsVersions>
+        <osVersion min="13.0"/>
+    </allowedOsVersions>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <license file="license.html" mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+    <options customize="never" require-scripts="true" hostArchitectures="x86_64,arm64"/>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <background file="bg.png" alignment="bottomleft" scaling="none" mime-type="image/png"/>
+    <volume-check>
+        <allowedVolumes><volume>/</volume></allowedVolumes>
+    </volume-check>
+    <choices-outline>
+        <line choice="default"><line choice="__APP_NAME__"/></line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="__APP_NAME__" visible="false">
+        <pkg-ref id="__BUNDLE_ID__"/>
+    </choice>
+    <pkg-ref id="__BUNDLE_ID__" version="__VERSION__" onConclusion="none">__APP_NAME__-component.pkg</pkg-ref>
+</installer-gui-script>

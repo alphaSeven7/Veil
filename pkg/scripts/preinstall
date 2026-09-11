@@ -1,0 +1,6 @@
+#!/bin/sh
+# 安装前：如果 Veil 正在运行，先退出，避免覆盖时文件被占用
+/bin/launchctl list 2>/dev/null | /usr/bin/grep -q "com.veil.browser" || true
+/usr/bin/pkill -x "Veil" 2>/dev/null || true
+sleep 1
+exit 0

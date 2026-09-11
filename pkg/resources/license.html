@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<style>body{font:12px/1.75 -apple-system,"PingFang SC",sans-serif;color:#1d1d1f;padding:14px 18px}
+h2{font-size:14px;margin:0 0 8px}p{margin:8px 0}code{font:11px ui-monospace,Menlo,monospace;background:#f2f2f5;padding:1px 4px;border-radius:3px}
+.warn{background:#fff8e6;border:1px solid #f0dca0;border-radius:8px;padding:10px 12px;margin:10px 0}</style></head><body>
+<h2>许可与使用条款</h2>
+<p>本软件按「现状」提供，不附带任何明示或暗示的担保。使用者需自行承担使用风险。</p>
+<p>Veil 是一款浏览器环境隔离与指纹管理工具，其设计用途包括：多账号运营环境隔离、跨浏览器兼容性测试、Web 反爬与风控系统的<b>自查与对抗性测试</b>、隐私保护研究、自动化测试基础设施等。</p>
+<div class="warn"><b>请勿用于违法用途。</b>使用者不得将本软件用于违反目标网站服务条款的行为、欺诈、身份冒用、规避法律监管、干扰计算机信息系统等任何非法活动。因使用本软件产生的任何后果由使用者自行承担。</div>
+<p><b>数据与隐私：</b>Veil 不收集、不上传任何用户数据。全部窗口配置、浏览数据、代理凭据均保存在本机 <code>~/Library/Application Support/Veil/</code> 目录中。可选的主密码加密使用 AES-256-GCM，密钥由你的密码经 PBKDF2-HMAC-SHA256（120,000 次迭代）本地派生，不存储密码本身。</p>
+<p><b>本地网络端口：</b>Veil 会监听 <code>127.0.0.1</code> 上的两个端口 —— 一个用于本地 API（默认 54345），一个用于向自检页提供资源；启动的每个浏览器实例还会各自监听一个 <code>127.0.0.1</code> 上的 Chrome DevTools Protocol 端口。这些端口都只绑定回环地址，不对外网暴露。但请注意：<b>本机上具有你同等权限的其它进程也能连接这些端口</b>，这是 CDP 注入方案的固有特性。</p>
+<p><b>第三方组件：</b>Veil 不包含 Chromium 源码，它启动并控制你系统上已安装的 Chrome / Chromium / Edge / Brave。这些浏览器各自遵循其原始许可协议。</p>
+<p><b>技术边界：</b>TLS/JA3、HTTP/2 指纹由真实浏览器二进制决定，无法通过注入改写。Veil 会默认让伪造的 UA 版本贴近本机 Chrome 版本以降低矛盾，但这不等于完全不可识别。请在决策前充分理解这一限制。</p>
+<p>继续安装即表示你已阅读并同意上述条款。</p>
+</body></html>
