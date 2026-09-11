@@ -227,5 +227,18 @@
   "onboarding": {
     "welcome": "欢迎使用 Veil",
     "firstRun": "首次启动需要采集本机真实指纹作为随机指纹的种子（约 3 秒）"
+  },
+  "header": {
+    "runningTotal": "运行中 / 总数",
+    "probeFingerprint": "重新探测本机指纹",
+    "viewLogs": "运行日志"
+  },
+  "host": {
+    "baseline": "本机指纹基线",
+    "chrome": "Chrome",
+    "gpu": "GPU",
+    "timezone": "时区",
+    "fonts": "字体",
+    "reprobe": "重新探测"
   }
 }

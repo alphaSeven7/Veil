@@ -227,5 +227,18 @@
   "onboarding": {
     "welcome": "Welcome to Veil",
     "firstRun": "On first launch, we collect this machine's real fingerprint as a seed for random fingerprints (~3 seconds)"
+  },
+  "header": {
+    "runningTotal": "Running / Total",
+    "probeFingerprint": "Re-detect Local Fingerprint",
+    "viewLogs": "Runtime Logs"
+  },
+  "host": {
+    "baseline": "Local Fingerprint Baseline",
+    "chrome": "Chrome",
+    "gpu": "GPU",
+    "timezone": "Timezone",
+    "fonts": "Fonts",
+    "reprobe": "Re-detect"
   }
 }
