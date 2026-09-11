@@ -1980,6 +1980,16 @@ function viewSettings() {
     <div class="view-head"><div class="view-title"><h1>${'settings.title2'}</h1><p>i18n.t('settings.versionLine')</p></div>
       <div class="view-tools"><button class="btn btn-primary" id="btnSaveSettings">${'button.save4'}</button></div></div>
     <div class="view-body"><div class="stack">
+      <!-- i18n: 界面语言选择（设置面板顶部；切换后由 AppSettings.locale 持久化，重启或下次启动生效） -->
+      <div class="form-row">
+        <label>${i18n.t('settings.language')}</label>
+        <select id="settingLocale">
+          <option value="zh-CN" ${(S.settings.locale || 'zh-CN') === 'zh-CN' ? 'selected' : ''}>${i18n.t('settings.languageZh')}</option>
+          <option value="en-US" ${(S.settings.locale || 'zh-CN') === 'en-US' ? 'selected' : ''}>${i18n.t('settings.languageEn')}</option>
+        </select>
+        <small>${i18n.t('settings.languageHelp')}</small>
+      </div>
+
       ${sec('api', '🔌', i18n.t('api.title'), st.apiEnabled ? i18n.t('api.enabled', {n: st.apiPort}) : i18n.t('api.disabled'), `
         ${sw('apiEnabled', st.apiEnabled !== false, i18n.t('settings.apiEnabled'), i18n.t('settings.apiEnabledHint'))}
         <div class="grid2">
@@ -2049,6 +2059,9 @@ function bindSettings(root) {
     S.settings[k] = v;
   });
   qs('#btnSaveSettings', root).onclick = async () => {
+    // i18n: 把界面语言选择写入 settings.locale，确保持久化到 Swift 侧 AppSettings
+    const localeEl = document.getElementById('settingLocale');
+    if (localeEl) S.settings.locale = localeEl.value || 'zh-CN';
     try { await Bridge.call('saveSettings', { settings: S.settings }); toast('ok', i18n.t('toast.savedProbe')); S.env = await Bridge.call('env', {}); S.apiInfo = await Bridge.call('apiInfo', {}); updateChrome(); }
     catch (e) { toast('err', i18n.t('toast.saveProfileFailed'), String(e.message || e), 8000); }
   };
