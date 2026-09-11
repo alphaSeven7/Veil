@@ -298,5 +298,6 @@ cp "$SNAP/AGENTS.md" ./AGENTS.md
 
 | 日期 | 版本 | 变更说明 |
 |------|------|----------|
+| 2026-09-12 | 0.3.0 | 修复「应用无法拖动窗口」bug：新增 DragRegionView native overlay（git 985b7da），详见 20260912_nlviews_drag_fix.md |
 | 2026-09-12 | 0.2.0 | 新增「任务会话交接（强制）」章节，强制 Codex agent 动手前先检查 Obsidian 任务列表 |
 | 2026-09-11 | 0.1.0 | 初版模板，从 db-aiops AGENTS.md 提炼并泛化 |
