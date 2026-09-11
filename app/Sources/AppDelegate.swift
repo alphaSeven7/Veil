@@ -47,6 +47,9 @@ private final class DragRegionView: NSView {
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
+        // 必须先做 bounds 检查：默认 NSView.hitTest 会在点出界时返回 nil。
+        // 我们覆盖了 hitTest，如果不显式检查，整个 contentView 的点击都会被本视图截走。
+        guard bounds.contains(point) else { return nil }
         for r in passthroughRects where r.contains(point) { return nil }
         return self
     }
