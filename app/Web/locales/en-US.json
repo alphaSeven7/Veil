@@ -385,7 +385,7 @@
   "settings": {
     "title": "Settings",
     "language": "Interface Language",
-    "languageZh": "简体中文",
+    "languageZh": "中文（简体）",
     "languageEn": "English",
     "languageHelp": "Takes effect immediately — no page refresh needed in the session",
     "apiPort": "Listen Port (127.0.0.1 only)",

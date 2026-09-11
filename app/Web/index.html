@@ -21,10 +21,13 @@
 <div id="boot"><div class="ring"></div><div class="t">VEIL LOADING</div></div>
 
 <script>
+// i18n: 优先级 window.__veilLocale（Swift 在 document start 注入）> meta 标签 > 默认 zh-CN
 (function(){
   var init = function(){
     if (!window.i18n) return;
-    var locale = (document.querySelector('meta[name="i18n-locale"]')||{}).content || 'zh-CN';
+    var locale = window.__veilLocale
+              || (document.querySelector('meta[name="i18n-locale"]')||{}).content
+              || 'zh-CN';
     if (locale === '__VEIL_LOCALE__') locale = 'zh-CN';
     i18n.init({ locale: locale, fallback: 'zh-CN' }).then(function(){
       i18n.applyToDOM();

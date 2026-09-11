@@ -126,6 +126,41 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         let ucc = WKUserContentController()
         bridge = Bridge()
         ucc.add(bridge, name: "veil")
+
+        // i18n 关键修复：
+        // WKWebView 加载的是 file:// URL，前端 fetch __veil/locales/<lang>.json 会被 CORS 拒绝。
+        // 解决：Swift 在 document start 阶段直接把字典内容注入 window.__veilLocaleDicts，
+        // JS init 优先使用这个 dict，不再 fetch。
+        let savedLocale = Store.shared.settings().locale
+        let bundleRoot = Paths.bundleWebRoot
+        var localeDictsJSON = "{}"
+        if let root = bundleRoot {
+            let enUSPath = root.appendingPathComponent("locales/en-US.json").path
+            let zhCNPath = root.appendingPathComponent("locales/zh-CN.json").path
+            let enUS = (try? String(contentsOfFile: enUSPath, encoding: .utf8)) ?? "{}"
+            let zhCN = (try? String(contentsOfFile: zhCNPath, encoding: .utf8)) ?? "{}"
+            // 转义：JSON 字符串需要 escape 反斜杠和单引号/双引号，避免嵌入 JS 时被截断
+            localeDictsJSON = "{ enUS: \(escapeForJS(enUS)), zhCN: \(escapeForJS(zhCN)) }"
+        }
+        VeilLog.info("[i18n] localeDictsJSON length: \(localeDictsJSON.count), preview: \(localeDictsJSON.prefix(200))")
+        let localeScript = WKUserScript(
+            source: """
+            (function(){
+              window.__veilLocale = \(savedLocaleJSON(savedLocale));
+              try {
+                const __dicts = \(localeDictsJSON);
+                window.__veilLocaleDicts = {
+                  'en-US': JSON.parse(__dicts.enUS || '{}'),
+                  'zh-CN': JSON.parse(__dicts.zhCN || '{}')
+                };
+              } catch(e){ console.error('[i18n] inject failed', e); }
+            })()
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        ucc.addUserScript(localeScript)
+
         cfg.userContentController = ucc
         cfg.preferences.javaScriptCanOpenWindowsAutomatically = true
         cfg.defaultWebpagePreferences.allowsContentJavaScript = true
@@ -188,10 +223,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
 
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         notifyJS("ready", true)
-        // i18n: 注入当前 locale，i18n.js init() 在 __veilLocale 缺失时回落到 zh-CN
-        let veilLocale = Store.shared.settings().locale
-        webView.evaluateJavaScript("window.__veilLocale = \"\(veilLocale)\";") { _, err in
-            if let err = err { VeilLog.warn("[i18n] 注入 __veilLocale 失败: \(err.localizedDescription)") }
+        // i18n: __veilLocale 和 locale dict 都已由 WKUserScript 在 document start 阶段注入。
+        // 异步加载完 locale dict 后再刷新一次 DOM，确保所有 [data-i18n] 元素正确翻译。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            webView.evaluateJavaScript("if(window.i18n){i18n.applyToDOM();}") { _, _ in }
         }
     }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -391,5 +426,18 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
             VeilLog.info("[app] 退出：保留 \(SessionManager.shared.count) 个运行中的窗口")
         }
     }
+
+
+    private func savedLocaleJSON(_ s: String) -> String { "\"\(s)\"" }
+
+    /// 把字符串转义成 JS 字符串字面量（用单引号包裹更安全）
+    private func escapeForJS(_ s: String) -> String {
+        var out = s.replacingOccurrences(of: "\\", with: "\\\\")
+                     .replacingOccurrences(of: "'", with: "\\'")
+                     .replacingOccurrences(of: "\n", with: "\\n")
+                     .replacingOccurrences(of: "\r", with: "\\r")
+        return "'" + out + "'"
+    }
+
     public func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }
 }

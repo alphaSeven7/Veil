@@ -28,14 +28,22 @@
   // 加载指定语言字典
   async function loadLocale(locale) {
     if (state.loaded[locale]) return state.dict[locale];
+    // 优先用 Swift 在 document start 注入的字典（避免 file:// 跨域 fetch 失败）
+    if (root.__veilLocaleDicts && root.__veilLocaleDicts[locale]) {
+      state.dict[locale] = root.__veilLocaleDicts[locale];
+      state.loaded[locale] = true;
+      console.log('[i18n] loaded ' + locale + ' (injected)');
+      return state.dict[locale];
+    }
     try {
       const res = await fetch(state.localesUrl + '/' + locale + '.json');
       if (!res.ok) throw new Error('HTTP ' + res.status);
       state.dict[locale] = await res.json();
       state.loaded[locale] = true;
+      console.log('[i18n] loaded ' + locale + ' (fetched)');
       return state.dict[locale];
     } catch (e) {
-      warn('加载 ' + locale + ' 失败：' + e.message);
+      console.warn('[i18n] load ' + locale + ' FAILED: ' + e.message);
       return {};
     }
   }
@@ -90,6 +98,7 @@
     async init(opts) {
       opts = opts || {};
       state.locale = opts.locale || (root.__veilLocale || 'zh-CN');
+      console.log('[i18n] init: locale=' + state.locale);
       state.fallback = opts.fallback || 'zh-CN';
       state.localesUrl = opts.localesUrl || '/__veil/locales';
       if (opts.dict) {

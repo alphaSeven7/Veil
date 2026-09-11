@@ -11,8 +11,18 @@ public final class Bridge: NSObject, WKScriptMessageHandler {
     public override init() { super.init(); Bridge.shared = self }
 
     public func userContentController(_ ucc: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "veil",
-              let body = message.body as? [String: Any],
+        guard message.name == "veil" else { return }
+        if let body = message.body as? [String: Any], let level = body["__veilLog"] as? String {
+            // 前端 console → VeilLog 转发
+            let msg = (body["msg"] as? String) ?? ""
+            switch level {
+            case "warn":  VeilLog.warn("[js] \(msg)")
+            case "error": VeilLog.error("[js] \(msg)")
+            default:       VeilLog.info("[js] \(msg)")
+            }
+            return
+        }
+        guard let body = message.body as? [String: Any],
               let mid = body["id"] as? Int,
               let method = body["method"] as? String else { return }
         let params = (body["params"] as? [String: Any]) ?? [:]
@@ -375,9 +385,35 @@ public final class Bridge: NSObject, WKScriptMessageHandler {
     /// i18n: 把当前 locale 推给前端 i18n 运行时，并刷新 DOM 文案
     private func applyLocaleToJS(_ locale: String) {
         guard let wv = webView else { return }
-        let js = "if(window.i18n){i18n.setLocale('\(locale)').then(function(){i18n.applyToDOM();});}"
+        // 1. 先把目标 locale 注入 window.__veilLocale（供 reload 后 init 使用）
+        // 2. setLocale + applyToDOM 同步执行；setLocale 是 async，所以用 then 链
+        // 3. setLocale 返回 Promise，evaluateJavaScript 对 Promise 类型返回不友好（会 warn）
+        //    但 Promise 仍会执行；为了消除 warn，改用 setTimeout 包一层
+        // 用 setTimeout 0 把 setLocale 包起来，让 IIFE 同步返回 undefined，
+        // 避免 evaluateJavaScript 把 Promise 当成 result type error。
+        // 然后用单独 evaluateJavaScript 读回 state.locale 做验证日志。
+        let js = """
+        (function(){
+          window.__veilLocale = '\(locale)';
+          if(!window.i18n) return;
+          i18n.setLocale('\(locale)').then(function(){
+            i18n.applyToDOM();
+            window.__veilLocaleAfter = i18n.getLocale();
+          });
+        })()
+        """
         wv.evaluateJavaScript(js) { _, err in
-            if let err = err { VeilLog.warn("[i18n] setLocale 失败: \(err.localizedDescription)") }
+            if let err = err {
+                VeilLog.warn("[i18n] setLocale 失败: \(err.localizedDescription)")
+            }
+        }
+        // 500ms 后读回 state 验证
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let js2 = "window.__veilLocaleAfter || (window.i18n && window.i18n.getLocale()) || 'nil'"
+            wv.evaluateJavaScript(js2) { result, err in
+                let actual = (result as? String) ?? "nil"
+                VeilLog.info("[i18n] setLocale \(locale) 完成 -> JS state.locale = \(actual)")
+            }
         }
     }
 
