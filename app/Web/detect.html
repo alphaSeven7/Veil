@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Veil · 指纹自检</title>
+<meta name="i18n-locale" content="__VEIL_LOCALE__">
 <style>
 :root{--bg:#0d0f14;--p:#151922;--p2:#1a1f2a;--p3:#202633;--l:#232a38;--l2:#2d3546;
 --t:#e7eaf2;--t2:#a8b0c2;--t3:#6f7889;--t4:#4d5566;--ac:#6c8cff;--ac2:#a06cff;
@@ -76,8 +77,29 @@ background:var(--p2);border:1px solid var(--l2);transition:.15s}
 canvas.pp{display:none}
 .foot{margin-top:20px;font-size:11px;color:var(--t4);text-align:center;line-height:1.8}
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
+<script>
+(function(){
+  var init = function(){
+    if (!window.i18n) return;
+    var locale = (document.querySelector('meta[name="i18n-locale"]')||{}).content || 'zh-CN';
+    if (locale === '__VEIL_LOCALE__') locale = 'zh-CN';
+    i18n.init({ locale: locale, fallback: 'zh-CN' }).then(function(){
+      i18n.applyToDOM();
+      document.documentElement.setAttribute('lang', locale);
+    }).catch(function(e){
+      console.error('[i18n] init failed', e);
+    });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 <div class="wrap">
   <header>
     <div class="logo"><svg viewBox="0 0 24 24" width="19" height="19">
@@ -91,7 +113,52 @@ canvas.pp{display:none}
     <button class="btn p" id="btnRe">↻ 重新检测</button>
   </header>
   <div id="root"><div class="load"><div class="spin"></div>正在采集指纹特征…</div></div>
-  <canvas class="pp" id="pp" width="260" height="48"></canvas>
+  <template id="i18n-detect-keys">
+  <!-- i18n key manifest（42 项：37 ROWS + 5 UA_DATA）—— 静态键映射，用于源码级校验和维护 -->
+  <span data-i18n="detect.checkUa">checkUa</span>
+  <span data-i18n="detect.checkPlatform">checkPlatform</span>
+  <span data-i18n="detect.checkLanguages">checkLanguages</span>
+  <span data-i18n="detect.checkTz">checkTz</span>
+  <span data-i18n="detect.checkTzOffset">checkTzOffset</span>
+  <span data-i18n="detect.checkWebdriver">checkWebdriver</span>
+  <span data-i18n="detect.checkCores">checkCores</span>
+  <span data-i18n="detect.checkMemory">checkMemory</span>
+  <span data-i18n="detect.checkTouch">checkTouch</span>
+  <span data-i18n="detect.checkDoNotTrack">checkDoNotTrack</span>
+  <span data-i18n="detect.checkScreen">checkScreen</span>
+  <span data-i18n="detect.checkAvailArea">checkAvailArea</span>
+  <span data-i18n="detect.checkColorDepth">checkColorDepth</span>
+  <span data-i18n="detect.checkDpr">checkDpr</span>
+  <span data-i18n="detect.checkWindowOuter">checkWindowOuter</span>
+  <span data-i18n="detect.checkWebglVendor">checkWebglVendor</span>
+  <span data-i18n="detect.checkWebglRenderer">checkWebglRenderer</span>
+  <span data-i18n="detect.checkWebglVendorRenderer">checkWebglVendorRenderer</span>
+  <span data-i18n="detect.checkMaxTextureSize">checkMaxTextureSize</span>
+  <span data-i18n="detect.checkWebgl2">checkWebgl2</span>
+  <span data-i18n="detect.checkCanvas">checkCanvas</span>
+  <span data-i18n="detect.checkAudio">checkAudio</span>
+  <span data-i18n="detect.checkWebrtc">checkWebrtc</span>
+  <span data-i18n="detect.checkConnection">checkConnection</span>
+  <span data-i18n="detect.checkMedia">checkMedia</span>
+  <span data-i18n="detect.checkPlugins">checkPlugins</span>
+  <span data-i18n="detect.checkSpeech">checkSpeech</span>
+  <span data-i18n="detect.checkFonts">checkFonts</span>
+  <span data-i18n="detect.checkBattery">checkBattery</span>
+  <span data-i18n="detect.checkStorage">checkStorage</span>
+  <span data-i18n="detect.checkAutomationMarks">checkAutomationMarks</span>
+  <span data-i18n="detect.checkChromeRuntime">checkChromeRuntime</span>
+  <span data-i18n="detect.checkToDataURLNative">checkToDataURLNative</span>
+  <span data-i18n="detect.checkWebglParamNative">checkWebglParamNative</span>
+  <span data-i18n="detect.checkScreenWidthNative">checkScreenWidthNative</span>
+  <span data-i18n="detect.checkFnToStringNative">checkFnToStringNative</span>
+  <span data-i18n="detect.checkPermissionsNotif">checkPermissionsNotif</span>
+  <span data-i18n="detect.checkUaChBrands">checkUaChBrands</span>
+  <span data-i18n="detect.checkUaChFullVersion">checkUaChFullVersion</span>
+  <span data-i18n="detect.checkUaChPlatform">checkUaChPlatform</span>
+  <span data-i18n="detect.checkUaChArch">checkUaChArch</span>
+  <span data-i18n="detect.checkUaChModel">checkUaChModel</span>
+</template>
+<canvas class="pp" id="pp" width="260" height="48"></canvas>
 </div>
 <script>
 const QS = new URLSearchParams(location.search);
@@ -201,57 +268,57 @@ async function collect(){
 }
 
 const ROWS=[
- {g:'基础',k:'User-Agent',a:r=>r.ua,e:x=>x.userAgent,c:(a,e)=>a===e},
- {g:'基础',k:'navigator.platform',a:r=>r.platform,e:x=>x.platform,c:(a,e)=>a===e},
- {g:'基础',k:'navigator.languages',a:r=>(r.languages||[]).join(', '),e:x=>(x.languages||[]).join(', '),c:(a,e)=>a===e},
- {g:'基础',k:'Intl 时区',a:r=>r.timezone,e:x=>x.timezone,c:(a,e)=>a===e},
- {g:'基础',k:'getTimezoneOffset',a:r=>r.tzOffset+' 分钟',e:()=>null},
- {g:'基础',k:'navigator.webdriver',a:r=>String(r.webdriver),e:()=>'false',c:a=>a==='false'},
- {g:'基础',k:'hardwareConcurrency',a:r=>r.hardwareConcurrency,e:x=>x.hardwareConcurrency,c:(a,e)=>String(a)===String(e)},
- {g:'基础',k:'deviceMemory',a:r=>r.deviceMemory,e:x=>x.deviceMemory,c:(a,e)=>String(a)===String(e)},
- {g:'基础',k:'maxTouchPoints',a:r=>r.maxTouchPoints,e:x=>x.maxTouchPoints,c:(a,e)=>String(a)===String(e)},
- {g:'基础',k:'Do Not Track',a:r=>r.doNotTrack===null?'null':r.doNotTrack,e:x=>x.doNotTrack?'1':'null'},
- {g:'屏幕',k:'screen 尺寸',a:r=>r.screen.slice(0,2).join(' × '),e:x=>x.screen?x.screen.slice(0,2).join(' × '):null,c:(a,e)=>a===e},
- {g:'屏幕',k:'可用区域',a:r=>r.screen.slice(2,4).join(' × '),e:x=>x.screen?(x.screen[0]+' × '+(x.screen[1]-(x.availTopOffset||0))):null,c:(a,e)=>a===e},
- {g:'屏幕',k:'色深',a:r=>r.screen[4],e:x=>x.screen?x.screen[2]:null},
- {g:'屏幕',k:'devicePixelRatio',a:r=>r.dpr,e:x=>x.devicePixelRatio,c:(a,e)=>String(a)===String(e)},
- {g:'屏幕',k:'window.outer',a:r=>r.outer.join(' × '),e:()=>null},
- {g:'图形',k:'WebGL UNMASKED_VENDOR',a:r=>r.gl&&r.gl.uv,e:x=>x.webglVendor,c:(a,e)=>a===e},
- {g:'图形',k:'WebGL UNMASKED_RENDERER',a:r=>r.gl&&r.gl.ur,e:x=>x.webglRenderer,c:(a,e)=>a===e},
- {g:'图形',k:'WebGL VENDOR / RENDERER',a:r=>r.gl?(r.gl.vendor+' / '+r.gl.renderer):r.gl,e:()=>null},
- {g:'图形',k:'MAX_TEXTURE_SIZE',a:r=>r.gl&&r.gl.maxTex,e:()=>null},
- {g:'图形',k:'WebGL2',a:r=>String(!!r.gl2),e:()=>null},
- {g:'图形',k:'Canvas 指纹（两次读取）',a:r=>(r.canvas||[]).join(' / '),e:x=>x.canvasNoise?'应两次一致':null,c:(a,e,r)=>r.canvas&&r.canvas[0]===r.canvas[1]},
- {g:'音频',k:'AudioContext 指纹（两次）',a:r=>(r.audio||[]).join(' / '),e:x=>x.audioNoise?'应两次一致':null,c:(a,e,r)=>r.audio&&r.audio.length===2&&r.audio[0]===r.audio[1]},
- {g:'网络',k:'WebRTC 本地 IP',a:r=>r.webrtc,e:x=>x.webrtcMode,c:(a,e,r)=>{
+ {g:'基础',k:'User-Agent',i18nKey:'detect.checkUa',a:r=>r.ua,e:x=>x.userAgent,c:(a,e)=>a===e},
+ {g:'基础',k:'navigator.platform',i18nKey:'detect.checkPlatform',a:r=>r.platform,e:x=>x.platform,c:(a,e)=>a===e},
+ {g:'基础',k:'navigator.languages',i18nKey:'detect.checkLanguages',a:r=>(r.languages||[]).join(', '),e:x=>(x.languages||[]).join(', '),c:(a,e)=>a===e},
+ {g:'基础',k:'Intl 时区',i18nKey:'detect.checkTz',a:r=>r.timezone,e:x=>x.timezone,c:(a,e)=>a===e},
+ {g:'基础',k:'getTimezoneOffset',i18nKey:'detect.checkTzOffset',a:r=>r.tzOffset+' 分钟',e:()=>null},
+ {g:'基础',k:'navigator.webdriver',i18nKey:'detect.checkWebdriver',a:r=>String(r.webdriver),e:()=>'false',c:a=>a==='false'},
+ {g:'基础',k:'hardwareConcurrency',i18nKey:'detect.checkCores',a:r=>r.hardwareConcurrency,e:x=>x.hardwareConcurrency,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'deviceMemory',i18nKey:'detect.checkMemory',a:r=>r.deviceMemory,e:x=>x.deviceMemory,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'maxTouchPoints',i18nKey:'detect.checkTouch',a:r=>r.maxTouchPoints,e:x=>x.maxTouchPoints,c:(a,e)=>String(a)===String(e)},
+ {g:'基础',k:'Do Not Track',i18nKey:'detect.checkDoNotTrack',a:r=>r.doNotTrack===null?'null':r.doNotTrack,e:x=>x.doNotTrack?'1':'null'},
+ {g:'屏幕',k:'screen 尺寸',i18nKey:'detect.checkScreen',a:r=>r.screen.slice(0,2).join(' × '),e:x=>x.screen?x.screen.slice(0,2).join(' × '):null,c:(a,e)=>a===e},
+ {g:'屏幕',k:'可用区域',i18nKey:'detect.checkAvailArea',a:r=>r.screen.slice(2,4).join(' × '),e:x=>x.screen?(x.screen[0]+' × '+(x.screen[1]-(x.availTopOffset||0))):null,c:(a,e)=>a===e},
+ {g:'屏幕',k:'色深',i18nKey:'detect.checkColorDepth',a:r=>r.screen[4],e:x=>x.screen?x.screen[2]:null},
+ {g:'屏幕',k:'devicePixelRatio',i18nKey:'detect.checkDpr',a:r=>r.dpr,e:x=>x.devicePixelRatio,c:(a,e)=>String(a)===String(e)},
+ {g:'屏幕',k:'window.outer',i18nKey:'detect.checkWindowOuter',a:r=>r.outer.join(' × '),e:()=>null},
+ {g:'图形',k:'WebGL UNMASKED_VENDOR',i18nKey:'detect.checkWebglVendor',a:r=>r.gl&&r.gl.uv,e:x=>x.webglVendor,c:(a,e)=>a===e},
+ {g:'图形',k:'WebGL UNMASKED_RENDERER',i18nKey:'detect.checkWebglRenderer',a:r=>r.gl&&r.gl.ur,e:x=>x.webglRenderer,c:(a,e)=>a===e},
+ {g:'图形',k:'WebGL VENDOR / RENDERER',i18nKey:'detect.checkWebglVendorRenderer',a:r=>r.gl?(r.gl.vendor+' / '+r.gl.renderer):r.gl,e:()=>null},
+ {g:'图形',k:'MAX_TEXTURE_SIZE',i18nKey:'detect.checkMaxTextureSize',a:r=>r.gl&&r.gl.maxTex,e:()=>null},
+ {g:'图形',k:'WebGL2',i18nKey:'detect.checkWebgl2',a:r=>String(!!r.gl2),e:()=>null},
+ {g:'图形',k:'Canvas 指纹（两次读取）',i18nKey:'detect.checkCanvas',a:r=>(r.canvas||[]).join(' / '),e:x=>x.canvasNoise?'应两次一致':null,c:(a,e,r)=>r.canvas&&r.canvas[0]===r.canvas[1]},
+ {g:'音频',k:'AudioContext 指纹（两次）',i18nKey:'detect.checkAudio',a:r=>(r.audio||[]).join(' / '),e:x=>x.audioNoise?'应两次一致':null,c:(a,e,r)=>r.audio&&r.audio.length===2&&r.audio[0]===r.audio[1]},
+ {g:'网络',k:'WebRTC 本地 IP',i18nKey:'detect.checkWebrtc',a:r=>r.webrtc,e:x=>x.webrtcMode,c:(a,e,r)=>{
     if(!e)return null; if(e==='disabled')return /无候选|超时|不可用/.test(String(a));
     if(e==='real')return true; return true;}},
- {g:'网络',k:'connection.effectiveType',a:r=>r.connection?r.connection.t:'—',e:()=>null},
- {g:'设备',k:'媒体设备 (in/out/video)',a:r=>r.devices&&typeof r.devices==='object'?r.devices.in+'/'+r.devices.out+'/'+r.devices.video:r.devices,e:()=>null},
- {g:'设备',k:'plugins.length',a:r=>r.plugins,e:x=>String(x.pluginsCount!==undefined?5:0),c:()=>null},
- {g:'设备',k:'语音合成数量',a:r=>r.voices,e:()=>null},
- {g:'设备',k:'字体探测命中',a:r=>(r.fontProbe||[]).join(', ')|| '（无）',e:x=>x.fontsMode?('策略: '+x.fontsMode):null,
+ {g:'网络',k:'connection.effectiveType',i18nKey:'detect.checkConnection',a:r=>r.connection?r.connection.t:'—',e:()=>null},
+ {g:'设备',k:'媒体设备 (in/out/video)',i18nKey:'detect.checkMedia',a:r=>r.devices&&typeof r.devices==='object'?r.devices.in+'/'+r.devices.out+'/'+r.devices.video:r.devices,e:()=>null},
+ {g:'设备',k:'plugins.length',i18nKey:'detect.checkPlugins',a:r=>r.plugins,e:x=>String(x.pluginsCount!==undefined?5:0),c:()=>null},
+ {g:'设备',k:'语音合成数量',i18nKey:'detect.checkSpeech',a:r=>r.voices,e:()=>null},
+ {g:'设备',k:'字体探测命中',i18nKey:'detect.checkFonts',a:r=>(r.fontProbe||[]).join(', ')|| '（无）',e:x=>x.fontsMode?('策略: '+x.fontsMode):null,
    c:(a,e,r,x)=>{ if(!x||x.fontsMode!=='strict') return null;
      const allowed=new Set((x.fonts||[]).map(f=>f.toLowerCase()));
      ['arial','helvetica','times new roman','courier new','verdana','tahoma','georgia'].forEach(f=>allowed.add(f));
      return (r.fontProbe||[]).every(f=>allowed.has(f.toLowerCase())); }},
- {g:'设备',k:'电池',a:r=>r.battery&&typeof r.battery==='object'?Math.round(r.battery.level*100)+'% '+(r.battery.charging?'充电中':'放电'):r.battery,e:()=>null},
- {g:'存储',k:'storage 配额',a:r=>r.storage&&r.storage.quota?(r.storage.quota/1073741824).toFixed(1)+' GB':'—',e:()=>null},
- {g:'反检测',k:'自动化残留全局变量',a:r=>(r.automationMarks||[]).join(', ')||'无',e:()=>'无',c:a=>a==='无'},
- {g:'反检测',k:'window.chrome.runtime',a:r=>String(!!r.chromeObj.runtime),e:()=>'false'},
- {g:'反检测',k:'toDataURL 伪装为原生',a:r=>String(r.nativeToString.canvasToDataURL),e:()=>'true',c:a=>a==='true'},
- {g:'反检测',k:'WebGL getParameter 伪装为原生',a:r=>String(r.nativeToString.webglGetParam),e:()=>'true',c:a=>a==='true'},
- {g:'反检测',k:'screen.width getter 伪装为原生',a:r=>String(r.nativeToString.screenWidthGetter),e:()=>'true',c:a=>a==='true'},
- {g:'反检测',k:'Function.toString 伪装为原生',a:r=>String(r.nativeToString.fnToString),e:()=>'true',c:a=>a==='true'},
- {g:'反检测',k:'Permissions 与 Notification 一致',a:r=>(r.permNotifications||'?')+' / '+(r.notificationPermission||'?'),e:()=>null,
+ {g:'设备',k:'电池',i18nKey:'detect.checkBattery',a:r=>r.battery&&typeof r.battery==='object'?Math.round(r.battery.level*100)+'% '+(r.battery.charging?'充电中':'放电'):r.battery,e:()=>null},
+ {g:'存储',k:'storage 配额',i18nKey:'detect.checkStorage',a:r=>r.storage&&r.storage.quota?(r.storage.quota/1073741824).toFixed(1)+' GB':'—',e:()=>null},
+ {g:'反检测',k:'自动化残留全局变量',i18nKey:'detect.checkAutomationMarks',a:r=>(r.automationMarks||[]).join(', ')||'无',e:()=>'无',c:a=>a==='无'},
+ {g:'反检测',k:'window.chrome.runtime',i18nKey:'detect.checkChromeRuntime',a:r=>String(!!r.chromeObj.runtime),e:()=>'false'},
+ {g:'反检测',k:'toDataURL 伪装为原生',i18nKey:'detect.checkToDataURLNative',a:r=>String(r.nativeToString.canvasToDataURL),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'WebGL getParameter 伪装为原生',i18nKey:'detect.checkWebglParamNative',a:r=>String(r.nativeToString.webglGetParam),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'screen.width getter 伪装为原生',i18nKey:'detect.checkScreenWidthNative',a:r=>String(r.nativeToString.screenWidthGetter),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'Function.toString 伪装为原生',i18nKey:'detect.checkFnToStringNative',a:r=>String(r.nativeToString.fnToString),e:()=>'true',c:a=>a==='true'},
+ {g:'反检测',k:'Permissions 与 Notification 一致',i18nKey:'detect.checkPermissionsNotif',a:r=>(r.permNotifications||'?')+' / '+(r.notificationPermission||'?'),e:()=>null,
    c:(a,e,r)=>!r.permNotifications||r.permNotifications==='prompt'||(r.permNotifications==='denied'&&r.notificationPermission==='denied')||(r.permNotifications==='granted'&&r.notificationPermission==='granted')},
 ];
 const UA_DATA=[
- {k:'UA-CH brands',a:r=>r.uaData?(r.uaData.brands||[]).map(b=>b.brand+';v="'+b.version+'"').join(', '):'不可用（非安全上下文）'},
- {k:'UA-CH fullVersionList',a:r=>r.uaDataHigh?(r.uaDataHigh.fullVersionList||[]).map(b=>b.brand+' '+b.version).join(' | '):'—'},
- {k:'UA-CH platform / version',a:r=>r.uaDataHigh?(r.uaDataHigh.platform+' '+r.uaDataHigh.platformVersion):'—'},
- {k:'UA-CH arch / bitness',a:r=>r.uaDataHigh?((r.uaDataHigh.architecture||'—')+' / '+(r.uaDataHigh.bitness||'—')):'—'},
- {k:'UA-CH model / wow64 / mobile',a:r=>r.uaDataHigh?(JSON.stringify(r.uaDataHigh.model)+' / '+r.uaDataHigh.wow64+' / '+r.uaDataHigh.mobile):'—'},
+ {k:'UA-CH brands',i18nKey:'detect.checkUaChBrands',a:r=>r.uaData?(r.uaData.brands||[]).map(b=>b.brand+';v="'+b.version+'"').join(', '):'不可用（非安全上下文）'},
+ {k:'UA-CH fullVersionList',i18nKey:'detect.checkUaChFullVersion',a:r=>r.uaDataHigh?(r.uaDataHigh.fullVersionList||[]).map(b=>b.brand+' '+b.version).join(' | '):'—'},
+ {k:'UA-CH platform / version',i18nKey:'detect.checkUaChPlatform',a:r=>r.uaDataHigh?(r.uaDataHigh.platform+' '+r.uaDataHigh.platformVersion):'—'},
+ {k:'UA-CH arch / bitness',i18nKey:'detect.checkUaChArch',a:r=>r.uaDataHigh?((r.uaDataHigh.architecture||'—')+' / '+(r.uaDataHigh.bitness||'—')):'—'},
+ {k:'UA-CH model / wow64 / mobile',i18nKey:'detect.checkUaChModel',a:r=>r.uaDataHigh?(JSON.stringify(r.uaDataHigh.model)+' / '+r.uaDataHigh.wow64+' / '+r.uaDataHigh.mobile):'—'},
 ];
 
 function esc(s){return s===null||s===undefined?'':String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -307,14 +374,14 @@ function render(){
       <thead><tr><th>检测项</th><th>页面实际值</th><th>配置期望值</th><th style="text-align:right">结论</th></tr></thead><tbody>`;
     groups[g].forEach(r=>{
       const badge=r.st===null?'<span class="b nu">参考</span>':r.st?'<span class="b ok">符合</span>':'<span class="b bd">不符</span>';
-      html+=`<tr><td class="k">${esc(r.k)}</td><td class="v">${esc(fmt(r.a))}</td><td class="e">${r.e===null||r.e===undefined?'—':esc(fmt(r.e))}</td><td class="s">${badge}</td></tr>`;
+      html+=`<tr><td class="k"><span data-i18n="${esc(r.i18nKey)}">${esc(r.k)}</span></td><td class="v">${esc(fmt(r.a))}</td><td class="e">${r.e===null||r.e===undefined?'—':esc(fmt(r.e))}</td><td class="s">${badge}</td></tr>`;
     });
     html+=`</tbody></table></div>`;
   }
 
   html+=`<div class="card"><h3>Client Hints（sec-ch-ua*）<span class="d">需要安全上下文（https 或 localhost）</span></h3>
     <table><colgroup><col style="width:210px"><col></colgroup><tbody>
-    ${UA_DATA.map(r=>{let v;try{v=r.a(RAW)}catch(e){v='ERR'}return `<tr><td class="k">${esc(r.k)}</td><td class="v">${esc(fmt(v))}</td></tr>`}).join('')}
+    ${UA_DATA.map(r=>{let v;try{v=r.a(RAW)}catch(e){v='ERR'}return `<tr><td class="k"><span data-i18n="${esc(r.i18nKey)}">${esc(r.k)}</span></td><td class="v">${esc(fmt(v))}</td></tr>`}).join('')}
     </tbody></table></div>`;
 
   html+=`<div class="card"><h3>外部验证<span class="d">在新标签打开，检查第三方风控视角</span></h3>
