@@ -299,6 +299,7 @@ cp "$SNAP/AGENTS.md" ./AGENTS.md
 
 | 日期 | 版本 | 变更说明 |
 |------|------|----------|
+| 2026-09-12 | 0.7.0 | drag fix v3：WKWebView frame 缩 46px 让出标题栏（git 82a96d1）；i18n.js `loaded` 默认 false 修复关键 bug |
 | 2026-09-12 | 0.6.0 | i18n locale 切换修复：WKUserScript 注入字典绕过 file:// CORS（git 3e1e759）；模板字面 key 修复（git 0f23f87） |
 | 2026-09-12 | 0.5.0 | i18n locale 切换 UI 修复：保存语言后 renderView(true)；init 优先用 __veilLocale；en-US label 区分 |
 | 2026-09-12 | 0.4.0 | drag fix v2：hitTest 补上 bounds 检查（git 98c856a），修复 v1 的「所有按钮失效」副作用 |
