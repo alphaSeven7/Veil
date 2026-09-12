@@ -115,7 +115,7 @@ ssh alphaseven@localhost "tail -f /Users/alphaseven/Library/Application Support/
 
 - [ ] 本地修改已提交版本控制
 - [ ] 已执行部署脚本同步到服务器
-- [ ] 已在 `CHANGELOG.md` 记录变更（见 §五）
+- [ ] 已在 `CHANGELOG.md` 追加记录变更（见 §五）
 - [ ] 服务验证通过（HTTP 200 / 业务健康检查）
 - [ ] 对相关功能做了回归测试（见 §三）
 
