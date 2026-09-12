@@ -77,6 +77,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
     private var statusItem: NSStatusItem?
     private var statusMenu: NSMenu!
     private var terminating = false
+    /// NSEvent local monitor: 拦截 leftMouseDown，命中顶部 46px 标题栏空白处时
+    /// 调 window.performDrag 拖动窗口，绕过 WKWebView layer-backed 对 hitTest 的拦截。
+    /// 保留对原变量赋值（addLocalMonitorForEvents 返回的 handle）以避免被 ARC 释放。
+    private var dragEventMonitor: Any?
 
     public func applicationDidFinishLaunching(_ notification: Notification) {
         Store.shared.load()
@@ -85,6 +89,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         }
 
         buildWindow()
+        installDragEventMonitor()
         buildMenus()
         if Store.shared.settings().keepInMenuBar { buildStatusItem() }
 
@@ -102,6 +107,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         VeilLog.info("[app] Veil \(LocalAPI.version) 启动完成，数据目录 \(Paths.supportRoot.path)")
+
     }
 
     private func buildWindow() {
@@ -166,17 +172,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         cfg.defaultWebpagePreferences.allowsContentJavaScript = true
         if #available(macOS 13.3, *) { cfg.preferences.isElementFullscreenEnabled = true }
 
-        // 关键：WKWebView 不覆盖顶部 46px（标题栏区域）。
-        // WKWebView 是 layer-backed，会拦截它 bounds 内的所有 mouseDown，
-        // 导致 drag 区域的 native overlay 收不到事件。
-        // 把 WKWebView 缩小避开标题栏，让 drag 区域独立于 WKWebView 之外。
-        let titleBarHeight: CGFloat = 46
-        let cvBounds = window.contentView!.bounds
-        webView = WKWebView(
-            frame: NSRect(x: 0, y: 0, width: cvBounds.width, height: cvBounds.height - titleBarHeight),
-            configuration: cfg
-        )
-        webView.autoresizingMask = [.width]  // 高度手动控制（避开顶部 46px）
+        // WKWebView 恢复全屏覆盖（drag fix v4）
+        // 之前的 drag fix v3 缩小 46px 破坏了 HTML hitTest（.track 被覆盖）
+        // 新方案：在 WKWebView 之上加一个 NSWindow 子类来拦截 drag
+        webView = WKWebView(frame: window.contentView!.bounds, configuration: cfg)
+        webView.autoresizingMask = [.width, .height]
         webView.navigationDelegate = self
         if #available(macOS 13.3, *) { webView.isInspectable = true }
         webView.setValue(false, forKey: "drawsBackground")   // 透明背景，避免白闪
@@ -195,11 +195,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
     private func installDragRegion() {
         guard let cv = window.contentView else { return }
         let tb: CGFloat = 46
-        // drag 区域覆盖整个顶部 46px（WKWebView 已缩进，这里是独立区域）
+        // drag 区域从 x=78 开始避开 traffic lights（WKWebView 全屏覆盖）
         let dragRegion = DragRegionView(frame: NSRect(
-            x: 0,
+            x: 78,
             y: cv.bounds.height - tb,
-            width: cv.bounds.width,
+            width: max(0, cv.bounds.width - 78),
             height: tb
         ))
         dragRegion.autoresizingMask = [.width, .maxYMargin]    // 横向拉伸，始终贴顶
@@ -207,6 +207,53 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         dragRegion.refreshPassthrough(windowWidth: cv.bounds.width)
         cv.addSubview(dragRegion)
         VeilLog.info("[app] 标题栏拖动区域已挂载 (\(Int(dragRegion.bounds.width))x\(Int(dragRegion.bounds.height)))")
+    }
+
+    /// 注册全局 leftMouseDown 事件监听，命中顶部 46px 标题栏「空白处」时调
+    /// window.performDrag 拖动窗口。命中搜索框 / 右侧按钮区时透传给 WKWebView。
+    ///
+    /// 为什么不用 DragRegionView 的 mouseDown：WKWebView 是 layer-backed，
+    /// 会拦截自身 bounds 内的 mouseDown，使 WKWebView 上层 NSView 收不到事件。
+    /// 即便 DragRegionView 在 z 序顶层，hitTest 也不会被调用。
+    /// NSEvent.addLocalMonitorForEvents 在事件分发到 WKWebView 之前拦截，能可靠触发。
+    private func installDragEventMonitor() {
+        dragEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown]) { [weak self] event in
+            guard let self = self, let win = self.window else { return event }
+            // 仅当窗口是 keyWindow 时拦截（避免影响其它窗口的点击）
+            guard win.isKeyWindow || win == NSApp.keyWindow else { return event }
+            let loc = event.locationInWindow
+            guard let cv = win.contentView else { return event }
+            let ptInCV = cv.convert(loc, from: nil)
+            let bw = cv.bounds.width
+            let h = cv.bounds.height
+            let tb: CGFloat = 46
+            // 拖动区：顶部 46px、x >= 78（避开 traffic lights）
+            guard ptInCV.x >= 78 else { return event }
+            guard ptInCV.y >= h - tb else { return event }
+            // passthrough：搜索框 + 右侧按钮
+            let searchW: CGFloat = 430
+            let searchH: CGFloat = 30
+            let searchRect = NSRect(
+                x: bw / 2 - searchW / 2,
+                y: h - (tb + searchH) / 2,
+                width: searchW,
+                height: searchH
+            )
+            let rightRect = NSRect(
+                x: max(0, bw - 200),
+                y: h - tb,
+                width: 200,
+                height: tb
+            )
+            if searchRect.contains(ptInCV) || rightRect.contains(ptInCV) {
+                return event  // 透传给 WKWebView
+            }
+            // 命中拖动区，触发窗口拖动并拦截事件
+            VeilLog.debug("[drag-monitor] HIT pt=(\(Int(ptInCV.x)),\(Int(ptInCV.y))) -> performDrag")
+            win.performDrag(with: event)
+            return nil
+        }
+        VeilLog.info("[app] 已注册拖动事件 monitor（NSEvent local monitor）")
     }
 
     private func loadUI() {
@@ -442,11 +489,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
 
     /// 把字符串转义成 JS 字符串字面量（用单引号包裹更安全）
     private func escapeForJS(_ s: String) -> String {
-        var out = s.replacingOccurrences(of: "\\", with: "\\\\")
-                     .replacingOccurrences(of: "'", with: "\\'")
-                     .replacingOccurrences(of: "\n", with: "\\n")
-                     .replacingOccurrences(of: "\r", with: "\\r")
-        return "'" + out + "'"
+        let escaped = s.replacingOccurrences(of: "\\", with: "\\\\")
+                       .replacingOccurrences(of: "'", with: "\\'")
+                       .replacingOccurrences(of: "\n", with: "\\n")
+                       .replacingOccurrences(of: "\r", with: "\\r")
+        return "'" + escaped + "'"
     }
 
     public func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }

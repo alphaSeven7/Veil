@@ -106,6 +106,7 @@ ssh alphaseven@localhost "tail -f /Users/alphaseven/Library/Application Support/
 
 ### 2.1 修改前检查清单
 
+- [ ] 先在Obsidian长任务清单中写要接下来要做的事，“开始时间: yyyymmdd hh24:mi” "开始修改/编写内容: "  "完成进度：x%"。 每完成一条必须马上记录。避免会话随时中断后新会话无法接续。
 - [ ] 本地和服务器代码是否一致（`echo '(macOS app — 无远程同步；分发靠导出 .pkg 给用户双击安装)'`）
 - [ ] 确认要修改的文件清单
 - [ ] 记录当前基线版本（dist/*.tar.gz 最近一份 / git tag）

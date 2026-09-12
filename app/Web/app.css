@@ -15,7 +15,7 @@
   --sh-3:0 24px 70px rgba(0,0,0,.6);
   --ff:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   --fm:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
-  --tb:0px; --sb:218px;
+  --tb:46px; --sb:218px;
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box}
@@ -39,8 +39,8 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
 .app{
   display:grid; height:100vh;
   grid-template-columns:var(--sb) 1fr;
-  grid-template-rows:1fr;
-  grid-template-areas:"sb main";
+  grid-template-rows:var(--tb) 1fr;
+  grid-template-areas:"tb tb" "sb main";
   background:
     radial-gradient(1100px 520px at 82% -12%, rgba(160,108,255,.075), transparent 62%),
     radial-gradient(900px 460px at 8% -8%, rgba(108,140,255,.085), transparent 60%),
@@ -176,8 +176,15 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
 .gchip{display:inline-flex;align-items:center;gap:4.5px;height:19px;padding:0 7px;border-radius:20px;
   font-size:10.5px;font-weight:520;background:var(--panel-2);border:1px solid var(--line-2);color:var(--tx-2)}
 .gchip i{width:6px;height:6px;border-radius:50%;flex:none}
-.rowacts{display:flex;gap:4px;justify-content:flex-end;opacity:.28;transition:.14s}
+/* 行操作按钮组：默认 85% 透明度，hover 时 100%。
+   之前 .28 太低 + .btn-ghost（透明背景 + 浅灰文字）在深色面板上几乎消失，
+   用户看不到"更多"按钮，误以为操作列只剩"打开"和"编辑"。*/
+.rowacts{display:flex;gap:5px;justify-content:flex-end;opacity:.85;transition:opacity .14s}
 tr:hover .rowacts{opacity:1}
+/* 行操作里的"更多"按钮（btn-ghost 完全透明背景 + 浅色文字）在 28% 不透明度下几乎看不见。
+   在 rowacts 容器内强制加边框 + 面板背景，让"更多"按钮显眼。*/
+.rowacts .btn-ghost{background:var(--panel-2);border-color:var(--line);color:var(--tx-2)}
+.rowacts .btn-ghost:hover{background:var(--panel-3);color:var(--tx);border-color:var(--line-2)}
 
 /* checkbox */
 .ck{appearance:none;width:15px;height:15px;border-radius:4.5px;border:1.5px solid var(--line-2);background:var(--panel-2);
