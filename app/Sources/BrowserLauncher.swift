@@ -78,7 +78,8 @@ public enum BrowserLauncher {
         // 代理
         if let p = proxyServerArg {
             a.append("--proxy-server=\(p)")
-            a.append("--proxy-bypass-list=<-loopback>")
+            // 显式列 loopback + Veil 本地 API 端口，避免依赖 Chrome 的 <-loopback> token（Chrome 152 中对 127.0.0.1 不再生效）
+            a.append("--proxy-bypass-list=127.0.0.1,localhost,::1,<-loopback>")
         }
 
         // WebRTC 策略（配合注入脚本双重保险）

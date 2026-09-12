@@ -202,6 +202,17 @@ final class RelayConn {
         }
         guard !host.isEmpty else { fail("no host"); return }
 
+        // Loopback 目标直接连接，不走上游代理
+        // 原因：上游代理在公网，连不到 127.0.0.1/localhost，会 RST，
+        //       导致客户端收到空响应（ERR_EMPTY_RESPONSE）。即使将来 Chrome 把 loopback
+        //       从 bypass list 里漏掉，中继这层也兜底，让本地 API（127.0.0.1:54345）等
+        //       回环地址永远能通。
+        if isLoopbackHost(host) {
+            connectDirect(host: host, port: port, isConnect: method == "CONNECT",
+                         originalHead: text, rewrittenPath: path, method: method, leftover: leftoverClient)
+            return
+        }
+
         if relay.upstream.type == "socks5" {
             connectViaSocks5(host: host, port: port, isConnect: method == "CONNECT",
                              originalHead: text, rewrittenPath: path, method: method, leftover: leftoverClient)
@@ -209,6 +220,62 @@ final class RelayConn {
             connectViaHttpProxy(host: host, port: port, isConnect: method == "CONNECT",
                                 originalHead: text, leftover: leftoverClient)
         }
+    }
+
+    // MARK: 直连（loopback 目标不走上游）
+
+    /// 判断是否为 loopback / 本机地址。
+    /// - 命中规则：127.0.0.0/8、::1、localhost 等同物。
+    /// - 含方括号包裹的 IPv6（如 `[::1]`）。
+    private func isLoopbackHost(_ host: String) -> Bool {
+        let h = host.trimmingCharacters(in: CharacterSet(charactersIn: "[]")).lowercased()
+        if h == "localhost" || h == "ip6-localhost" || h == "ip6-loopback" { return true }
+        if h == "::1" { return true }
+        // 127.0.0.0/8
+        if h.hasPrefix("127.") {
+            let parts = h.split(separator: ".")
+            if parts.count == 4, parts.allSatisfy({ Int($0) != nil }) { return true }
+        }
+        return false
+    }
+
+    /// 直接连到目标主机（绕开上游代理）。仅用于 loopback 目标。
+    private func connectDirect(host: String, port: Int, isConnect: Bool, originalHead: String,
+                               rewrittenPath: String, method: String, leftover: Data) {
+        VeilLog.debug("[relay] loopback 直连 -> \(host):\(port) (connect=\(isConnect))")
+        let up = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: UInt16(port))!, using: NWParameters.tcp)
+        upstreamConn = up
+        up.stateUpdateHandler = { [weak self] st in
+            switch st {
+            case .ready:
+                guard let self = self else { return }
+                if isConnect {
+                    // HTTPS 隧道：客户端期望 "200 Connection Established" 后开始透传
+                    self.toClient(Data("HTTP/1.1 200 Connection Established\r\n\r\n".utf8))
+                    self.beginPiping(up, initialClient: self.leftoverClient.isEmpty ? nil : self.leftoverClient)
+                } else {
+                    // HTTP absolute-form 改写成 origin-form（去掉 http://host:port 前缀）
+                    var lines = originalHead.components(separatedBy: "\r\n")
+                    if let i = lines.firstIndex(where: { $0.hasPrefix(method + " ") }) {
+                        let comps = lines[i].split(separator: " ").map(String.init)
+                        if comps.count >= 3 { lines[i] = "\(comps[0]) \(rewrittenPath) \(comps[2])" }
+                    }
+                    // 去掉代理相关头（直连不需要）
+                    lines = lines.filter { !$0.lowercased().hasPrefix("proxy-authorization:") && !$0.lowercased().hasPrefix("proxy-connection:") }
+                    var payload = Data(lines.joined(separator: "\r\n").utf8)
+                    payload.append(leftover)
+                    up.send(content: payload, completion: .contentProcessed { [weak self] err in
+                        guard let self = self else { return }
+                        if let err = err { self.fail("loopback 发送失败: \(err.localizedDescription)"); return }
+                        self.beginPiping(up, initialClient: nil)
+                    })
+                }
+            case .failed(let e): self?.fail("loopback 连接失败: \(e.localizedDescription)")
+            case .waiting(let e): self?.fail("loopback 不可达: \(e.localizedDescription)")
+            default: break
+            }
+        }
+        up.start(queue: relay.lq)
     }
 
     // MARK: 上游 HTTP(S) 代理
