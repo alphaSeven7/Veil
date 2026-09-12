@@ -15,7 +15,7 @@
   --sh-3:0 24px 70px rgba(0,0,0,.6);
   --ff:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   --fm:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
-  --tb:46px; --sb:218px;
+  --tb:0px; --sb:218px;
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box}
@@ -39,8 +39,8 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
 .app{
   display:grid; height:100vh;
   grid-template-columns:var(--sb) 1fr;
-  grid-template-rows:var(--tb) 1fr;
-  grid-template-areas:"tb tb" "sb main";
+  grid-template-rows:1fr;
+  grid-template-areas:"sb main";
   background:
     radial-gradient(1100px 520px at 82% -12%, rgba(160,108,255,.075), transparent 62%),
     radial-gradient(900px 460px at 8% -8%, rgba(108,140,255,.085), transparent 60%),

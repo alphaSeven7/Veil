@@ -9,7 +9,7 @@
     locale: 'zh-CN',
     fallback: 'zh-CN',
     dict: { 'zh-CN': {}, 'en-US': {} },
-    loaded: { 'zh-CN': true, 'en-US': false },
+    loaded: { 'zh-CN': false, 'en-US': false },
     localesUrl: '/__veil/locales',
     missing: new Set(),
     ready: null, // Promise
@@ -107,6 +107,9 @@
           state.loaded[k] = true;
         }
       }
+      // 强制重新加载（修复后即使 loaded=true 也会重读 __veilLocaleDicts）
+      state.loaded[state.locale] = false;
+      state.loaded[state.fallback] = false;
       state.ready = Promise.all([loadLocale(state.locale), loadLocale(state.fallback)]);
       await state.ready;
       return state.ready;
@@ -191,4 +194,7 @@
   };
 
   root.i18n = i18n;
+
+  // DEBUG ONLY: 暴露 state 到 window 用于 inspect
+  if (typeof window !== 'undefined') { window.__i18nDebug = state; }
 })(typeof window !== 'undefined' ? window : globalThis);

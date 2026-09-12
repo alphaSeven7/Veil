@@ -20,13 +20,13 @@ private final class DragRegionView: NSView {
     func refreshPassthrough(windowWidth: CGFloat) {
         let bw = max(windowWidth, 800)
         let h = bounds.height          // 46
-        let leftInset: CGFloat = 78     // traffic lights + HTML padding-left
-        let localW = bw - leftInset    // dragRegion 自身宽度
+        let leftInset: CGFloat = 0     // drag 区域覆盖整个窗口宽度（traffic lights 由 NSWindow 原生按钮处理）
+        let localW = bw                  // dragRegion 自身宽度（覆盖整个窗口）
 
         // 搜索框：HTML 标题栏里居中 ~430px 宽
         let searchW: CGFloat = 430
         let searchH: CGFloat = 30
-        let searchLocalCx = (bw / 2) - leftInset
+        let searchLocalCx = bw / 2
         let searchRect = NSRect(
             x: searchLocalCx - searchW / 2,
             y: (h - searchH) / 2,
@@ -166,8 +166,17 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         cfg.defaultWebpagePreferences.allowsContentJavaScript = true
         if #available(macOS 13.3, *) { cfg.preferences.isElementFullscreenEnabled = true }
 
-        webView = WKWebView(frame: window.contentView!.bounds, configuration: cfg)
-        webView.autoresizingMask = [.width, .height]
+        // 关键：WKWebView 不覆盖顶部 46px（标题栏区域）。
+        // WKWebView 是 layer-backed，会拦截它 bounds 内的所有 mouseDown，
+        // 导致 drag 区域的 native overlay 收不到事件。
+        // 把 WKWebView 缩小避开标题栏，让 drag 区域独立于 WKWebView 之外。
+        let titleBarHeight: CGFloat = 46
+        let cvBounds = window.contentView!.bounds
+        webView = WKWebView(
+            frame: NSRect(x: 0, y: 0, width: cvBounds.width, height: cvBounds.height - titleBarHeight),
+            configuration: cfg
+        )
+        webView.autoresizingMask = [.width]  // 高度手动控制（避开顶部 46px）
         webView.navigationDelegate = self
         if #available(macOS 13.3, *) { webView.isInspectable = true }
         webView.setValue(false, forKey: "drawsBackground")   // 透明背景，避免白闪
@@ -186,10 +195,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
     private func installDragRegion() {
         guard let cv = window.contentView else { return }
         let tb: CGFloat = 46
+        // drag 区域覆盖整个顶部 46px（WKWebView 已缩进，这里是独立区域）
         let dragRegion = DragRegionView(frame: NSRect(
-            x: 78,                                              // 避开左上 traffic lights
+            x: 0,
             y: cv.bounds.height - tb,
-            width: max(0, cv.bounds.width - 78),
+            width: cv.bounds.width,
             height: tb
         ))
         dragRegion.autoresizingMask = [.width, .maxYMargin]    // 横向拉伸，始终贴顶
